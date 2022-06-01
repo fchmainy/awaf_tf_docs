@@ -10,24 +10,24 @@ So the goal here is to **import** the current policy, which will be our current 
 
 **on the BIG-IP:**
 
-[ ] version 15.1 minimal
-[ ] credentials with REST API access
+ - [ ] version 15.1 minimal
+ - [ ] credentials with REST API access
 
 
 **on Terraform:**
 
-[ ] use of F5 bigip provider version 1.14.0 minimal
-[ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
+ - [ ] use of F5 bigip provider version 1.14.0 minimal
+ - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 
 
 ## Policy Import
 
-Create 3 files:
+Create 4 files:
 - main.tf
 - variables.tf
 - inputs.tfvars
-
+- outputs.tf
 
 
 **variables.tf**
@@ -141,15 +141,10 @@ Import successful!
 
 The resources that were imported are shown above. These resources are now in
 your Terraform state and will henceforth be managed by Terraform.
+```
 
 
-foo@bar:~$ terraform show -no-color
-
-
-
-
-
-Now update your terraform main.tf file with the content of the output:
+Now update your terraform main.tf file with the ouputs of the following two commands:
 
 ```console
 foo@bar:~$ terraform show -json | jq '.values.root_module.resources[].values.policy_export_json | fromjson' > importedWAFPolicy.json
