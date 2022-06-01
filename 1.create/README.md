@@ -258,3 +258,5 @@ bigip_waf_policy.this: Modifications complete after 17s [id=41UMLL7yDtzoa0000Wim
 
 Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
 ```
+
+Of course, what we have done by adding parameters in the **parameters.tf** file can also be done with URLs, filetypes and attack signatures using the data sources and resources defintions as it is documented in the [bigip terraform provider official documentation](https://registry.terraform.io/providers/F5Networks/bigip/latest/docs).
