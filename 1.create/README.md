@@ -36,7 +36,7 @@ variable password {}
 ```terraform
 bigip = "10.1.1.9:8443"
 username = "admin"
-password = "as09.1qa"
+password = "yYyYyYy"
 ```
 
 **main.tf**
