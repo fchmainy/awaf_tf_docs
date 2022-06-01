@@ -23,11 +23,11 @@ So the goal here is to **import** the current policy, which will be our current 
 
 ## Policy Import
 
-Create 4 files:
+Create 3 files:
 - main.tf
 - variables.tf
 - inputs.tfvars
-- outputs.tf
+
 
 
 **variables.tf**
@@ -144,7 +144,10 @@ your Terraform state and will henceforth be managed by Terraform.
 ```
 
 
+
+
 Now update your terraform main.tf file with the ouputs of the following two commands:
+
 
 ```console
 foo@bar:~$ terraform show -json | jq '.values.root_module.resources[].values.policy_export_json | fromjson' > importedWAFPolicy.json
@@ -213,6 +216,7 @@ policyJSON = "{[...]}"
 ## Policy lifecycle management
 Now you can manage your WAF Policy as we did [in the previous lab](https://github.com/fchmainy/awaf_tf_docs/edit/main/1.create/README.md#policy-lifecycle-management)
 
+You can check your WAF Policy on your BIG-IP after each terraform apply.
 
 ### Defining parameters
 
@@ -243,26 +247,80 @@ foo@bar:~$ terraform apply "scenario2"
 ```
 
 ### Defining URLs
+
 Create a **urls.tf** file:
 
 ```terraform
-data "bigip_waf_entity_parameter" "P1" {
-  name            = "Parameter1"
-  type            = "explicit"
-  data_type       = "alpha-numeric"
-  perform_staging = true
-  signature_overrides_disable = [200001494, 200001472]
+data "bigip_waf_entity_url" "U1" {
+  name		              = "/URL1"
+  description                 = "this is a test for URL1"
+  type                        = "explicit"
+  protocol                    = "HTTP"
+  perform_staging             = true
+  signature_overrides_disable = [12345678, 87654321]
+  method_overrides {
+    allow  = false
+    method = "BCOPY"
+  }
+  method_overrides {
+    allow  = true
+    method = "BDELETE"
+  }
+}
+
+data "bigip_waf_entity_url" "U2" {
+  name                        = "/URL2"
 }
 ```
+
+And add references to this URL in the **"bigip_waf_policy"** TF resource in the **main.tf** file:
+
+```terraform
+resource "bigip_waf_policy" "this" {
+  [...]
+  urls                 = [data.bigip_waf_entity_url.U1.json, data.bigip_waf_entity_url.U2.json]
+}
+```
+
+and run it:
+
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario2
+foo@bar:~$ terraform apply "scenario2"
+```
+
+### Defining Attack Signatures
 
 Create a **signatures.tf** file:
 
 ```terraform
-data "bigip_waf_entity_parameter" "P1" {
-  name            = "Parameter1"
-  type            = "explicit"
-  data_type       = "alpha-numeric"
-  perform_staging = true
-  signature_overrides_disable = [200001494, 200001472]
+data "bigip_waf_signatures" "S1" {
+  signatureId      = 200104004
+  description      = "Java Code Execution"
+  enabled          = true
+  perform_staging  = true
+}
+
+data "bigip_waf_signatures" "S2" {
+  signatureId      = 200104005
+  enabled          = false
 }
 ```
+
+And add references to this URL in the **"bigip_waf_policy"** TF resource in the **main.tf** file:
+
+```terraform
+resource "bigip_waf_policy" "this" {
+  [...]
+  signatures       = [data.bigip_waf_signatures.S1.json, data.bigip_waf_signatures.S2.json]
+}
+```
+
+and run it:
+
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario2
+foo@bar:~$ terraform apply "scenario2"
+```
+
+
