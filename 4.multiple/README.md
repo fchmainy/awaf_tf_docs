@@ -64,14 +64,27 @@ provider "bigip" {
   password = var.password
 }
 
+data "http" "scenario4" {
+  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/4.multiple/lab/Common_scenario4__2022-6-2_13-38-14__production.f5demo.com.json?token=GHSAT0AAAAAABMHNSKUQZBAYO7NCJUZBEF6YUYUHVA"
+  request_headers = {
+  	Accept = "application/json"
+  }
+}
 
-resource "bigip_waf_policy" "this" {
+resource "bigip_waf_policy" "app1_qa" {
     application_language = "utf-8"
     name                 = "/Common/scenario4"
-    policy_id            = "E-rJ0Aa2BUjq527-JBwBlVw"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
-    policy_import_json   = file("${path.module}/importedWAFPolicy.json")
+    policy_import_json   = data.http.scenario4.body
+}
+
+resource "bigip_waf_policy" "app1_prod" {
+    application_language = "utf-8"
+    name                 = "/Common/scenario4"
+    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
+    type                 = "security"
+    policy_import_json   = data.http.scenario4.body
 }
 ```
 *Note: the template name can be set to anything. When it is imported, we will overwrite the value*
