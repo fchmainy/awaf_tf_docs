@@ -38,7 +38,6 @@ variable password {}
 qa_bigip = "10.1.1.4:8443"
 prod_bigip = "10.1.1.9:8443"
 username = "admin"
-password = "as09.1qa"
 password = "whatIsYourBigIPPassword?"
 ```
 
@@ -53,23 +52,26 @@ terraform {
   }
 }
 provider "bigip" {
-  alias    = "old"
-  address  = var.previous_bigip
+  alias    = "qa"
+  address  = var.qa_bigip
   username = var.username
   password = var.password
 }
 provider "bigip" {
-  alias    = "new"
-  address  = var.latest_bigip
+  alias    = "prod"
+  address  = var.prod_bigip
   username = var.username
   password = var.password
 }
 
 
-resource "bigip_waf_policy" "current" {
-  provider	       = bigip.old
-  name                 = "/Common/scenario3"
-  template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+resource "bigip_waf_policy" "this" {
+    application_language = "utf-8"
+    name                 = "/Common/scenario4"
+    policy_id            = "E-rJ0Aa2BUjq527-JBwBlVw"
+    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
+    type                 = "security"
+    policy_import_json   = file("${path.module}/importedWAFPolicy.json")
 }
 ```
 *Note: the template name can be set to anything. When it is imported, we will overwrite the value*
