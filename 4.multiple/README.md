@@ -71,7 +71,7 @@ data "http" "scenario4" {
   }
 }
 
-resource "bigip_waf_policy" "app1_qa" {
+resource "bigip_waf_policy" "s4_qa" {
     application_language = "utf-8"
     name                 = "/Common/scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
@@ -79,7 +79,7 @@ resource "bigip_waf_policy" "app1_qa" {
     policy_import_json   = data.http.scenario4.body
 }
 
-resource "bigip_waf_policy" "app1_prod" {
+resource "bigip_waf_policy" "s4_prod" {
     application_language = "utf-8"
     name                 = "/Common/scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
@@ -142,24 +142,34 @@ variable "signatures" {
 
 signatures = {
     200000070 = {
-        signature_id = 200000070
-        description = "SQL-INJ "master.." database (Headers)"
+        signature_id 	= 200000070
+        description 	= 'SQL-INJ "master.." database (Headers)'
+	enabled		= true
+	perform_staging	= false
     }
     200000071 = {
-        signature_id = 200000071
-        description = "SQL-INJ "master.." database (Parameters)"
+        signature_id 	= 200000071
+        description 	= 'SQL-INJ "master.." database (Parameters)'
+	enabled		= true
+	perform_staging	= false
     }
     200000072 = {
-        signature_id = 200000072
-        description = "SQL-INJ "UNION SELECT" (Headers)"
+        signature_id 	= 200000072
+        description 	= 'SQL-INJ "UNION SELECT" (Headers)'
+	enabled		= true
+	perform_staging	= false
     }
     200000073 = {
-        signature_id = 200000073
-        description = "SQL-INJ "UNION SELECT" (Parameter)"
+        signature_id 	= 200000073
+        description 	= 'SQL-INJ "UNION SELECT" (Parameter)'
+	enabled		= true
+	perform_staging	= false
     }
     200000076 = {
-        signature_id = 200000076
-        description = "SQL-INJ "mysql" (Headers)"
+        signature_id 	= 200000076
+        description 	= 'SQL-INJ "mysql" (Headers)'
+	enabled		= true
+	perform_staging	= false
     }
 }
 
@@ -168,34 +178,25 @@ data "bigip_waf_signatures" "map" {
   
   signature_id		= each.value["signature_id"]
   description		= each.value["description"]
+  enabled		= each.value["enabled"]
+  perform_staging	= each.value["perform_staging"]
 }
 ```
 
-add the following variable into the **variables.tf**
-
-```terraform
-
-```
-
-create a **signatures.tfvars** tfvars file:
-
-```terraform
-
-```
 
 update the **main.tf** file:
 
 ```terraform
-resource "bigip_waf_policy" "app1_qa" {
+resource "bigip_waf_policy" "s4_qa" {
     application_language = "utf-8"
     name                 = "/Common/scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = 
+    signatures		 = [data.bigip_waf_signatures.map.*.json]
 }
 
-resource "bigip_waf_policy" "app1_prod" {
+resource "bigip_waf_policy" "s4_prod" {
     application_language = "utf-8"
     name                 = "/Common/scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
@@ -204,4 +205,133 @@ resource "bigip_waf_policy" "app1_prod" {
 }
 ```
 
+now, plan & apply!:
+
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+
+foo@bar:~$ terraform apply "scenario4"
+```
+
+We can verify that the 5 attack signatures have been enabled and enforced on the scenario4 WAF Policy on the QA BIG-IP.
+
+Now, the applicatiopn owner identified that these last changes on the QA device have introduced some FP. Using the log events on the A.WAF GUI, we identified that :
+ - the attack signature **"200000073"** should be disabled globally
+ - the attack signature **"200000070"** should be disabled for the **"/U1"** URL 
+ - the attack signaure **"200000071"** should be disabled at the parameter **"P1"** defined under the **"/U1"** URL.
+ 
+ so we can proceed to the final changes before enforcing into production:
+ 
+**signatures.tf** file:
+
+```terraform
+variable "signatures" {
+  type = map(object({
+ 	signature_id  	= integer
+	name 		= string
+	description	= string
+  }))
+}
+
+signatures = {
+    200000070 = {
+        signature_id 	= 200000070
+        description 	= 'SQL-INJ "master.." database (Headers)'
+	enabled		= true
+	perform_staging	= false
+    }
+    200000071 = {
+        signature_id 	= 200000071
+        description 	= 'SQL-INJ "master.." database (Parameters)'
+	enabled		= true
+	perform_staging	= false
+    }
+    200000072 = {
+        signature_id 	= 200000072
+        description 	= 'SQL-INJ "UNION SELECT" (Headers)'
+	enabled		= true
+	perform_staging	= false
+    }
+    200000073 = {
+        signature_id 	= 200000073
+        description 	= 'SQL-INJ "UNION SELECT" (Parameter)'
+	enabled		= false
+	perform_staging	= false
+    }
+    200000076 = {
+        signature_id 	= 200000076
+        description 	= 'SQL-INJ "mysql" (Headers)'
+	enabled		= true
+	perform_staging	= false
+    }
+}
+
+data "bigip_waf_signatures" "map" {
+  for_each		= var.signatures
+  
+  signature_id		= each.value["signature_id"]
+  description		= each.value["description"]
+  enabled		= each.value["enabled"]
+  perform_staging	= each.value["perform_staging"]
+}
+```
+
+**parameters.tf** file:
+
+```terraform
+data "bigip_waf_entity_parameter" "P1" {
+  name            		= "P1"
+  type            		= "explicit"
+  data_type       		= "alpha-numeric"
+  perform_staging 		= true
+  signature_overrides_disable 	= [200000071]
+  url		  		= data.bigip_waf_entity_url.U1
+}
+```
+
+**urls.tf** file:
+
+```terraform
+data "bigip_waf_entity_url" "U1" {
+  name		              	= "/U1"
+  type                        	= "explicit"
+  perform_staging             	= false
+  signature_overrides_disable 	= [200000070]
+}
+```
+
+
+update the **main.tf** file:
+
+```terraform
+resource "bigip_waf_policy" "s4_qa" {
+    application_language = "utf-8"
+    name                 = "/Common/scenario4"
+    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
+    type                 = "security"
+    policy_import_json   = data.http.scenario4.body
+    signatures		 = [data.bigip_waf_signatures.map.*.json]
+    parameters		 = [data.bigip_waf_entity_parameter.P1.json]
+    urls		 = [data.bigip_waf_entity_url.U1.json]
+}
+
+resource "bigip_waf_policy" "s4_prod" {
+    application_language = "utf-8"
+    name                 = "/Common/scenario4"
+    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
+    type                 = "security"
+    policy_import_json   = data.http.scenario4.body
+    signatures		 = [data.bigip_waf_signatures.map.*.json]
+    parameters		 = [data.bigip_waf_entity_parameter.P1.json]
+    urls		 = [data.bigip_waf_entity_url.U1.json]
+}
+```
+
+now, plan & apply!:
+
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+
+foo@bar:~$ terraform apply "scenario4"
+```
 
