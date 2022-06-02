@@ -100,3 +100,108 @@ output "policyJSON" {
         value   = bigip_waf_policy.this.policy_export_json
 }
 ```
+Here, we are referencing an existing policy from a GitHub repository but it can also be created from zero on both BIG-IPs.
+
+Now initialize, plan and apply your new Terraform project.
+```console
+foo@bar:~$ terraform init
+Initializing the backend...
+
+Initializing provider plugins...
+[...]
+Terraform has been successfully initialized!
+
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+
+foo@bar:~$ terraform apply "scenario4"
+
+```
+You can check on both BIG-IPs, the two policies are here and very consistent.
+
+===
+
+## Simulate a WAF Policy workflow
+
+Here is a common workflow:
+ - enforcing attack signatures on the QA environment
+ - checking if these changes does not break the application and identify potential False Positives
+ - applying the changes on QA before applying them on Production
+
+### Enforcing attack signatures on the QA environment
+
+Create a **signatures.tf** file:
+
+```terraform
+variable "signatures" {
+  type = map(object({
+ 	signature_id  	= integer
+	name 		= string
+	description	= string
+  }))
+}
+
+signatures = {
+    200000070 = {
+        signature_id = 200000070
+        description = "SQL-INJ "master.." database (Headers)"
+    }
+    200000071 = {
+        signature_id = 200000071
+        description = "SQL-INJ "master.." database (Parameters)"
+    }
+    200000072 = {
+        signature_id = 200000072
+        description = "SQL-INJ "UNION SELECT" (Headers)"
+    }
+    200000073 = {
+        signature_id = 200000073
+        description = "SQL-INJ "UNION SELECT" (Parameter)"
+    }
+    200000076 = {
+        signature_id = 200000076
+        description = "SQL-INJ "mysql" (Headers)"
+    }
+}
+
+data "bigip_waf_signatures" "map" {
+  for_each		= var.signatures
+  
+  signature_id		= each.value["signature_id"]
+  description		= each.value["description"]
+}
+```
+
+add the following variable into the **variables.tf**
+
+```terraform
+
+```
+
+create a **signatures.tfvars** tfvars file:
+
+```terraform
+
+```
+
+update the **main.tf** file:
+
+```terraform
+resource "bigip_waf_policy" "app1_qa" {
+    application_language = "utf-8"
+    name                 = "/Common/scenario4"
+    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
+    type                 = "security"
+    policy_import_json   = data.http.scenario4.body
+    signatures		 = 
+}
+
+resource "bigip_waf_policy" "app1_prod" {
+    application_language = "utf-8"
+    name                 = "/Common/scenario4"
+    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
+    type                 = "security"
+    policy_import_json   = data.http.scenario4.body
+}
+```
+
+
