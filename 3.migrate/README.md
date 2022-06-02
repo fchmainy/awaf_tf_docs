@@ -32,11 +32,11 @@ The WAF Policy and its children objects (parameters, urls, attack signatures, ex
 
 ## Policy Migration
 
-Create 3 files:
+Create 4 files:
 - main.tf
 - variables.tf
 - inputs.tfvars
-
+- outputs.tf
 
 
 **variables.tf**
@@ -52,7 +52,6 @@ variable password {}
 previous_bigip = "10.1.1.4:8443"
 new_bigip = "10.1.1.9:8443"
 username = "admin"
-password = "as09.1qa"
 password = "whatIsYourBigIPPassword?"
 ```
 
