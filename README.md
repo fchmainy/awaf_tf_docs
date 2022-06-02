@@ -21,9 +21,22 @@ The goal of [this lab](https://github.com/fchmainy/awaf_tf_docs/blob/main/2.impo
 
 ------
 ### Scenario #3: Migrating a WAF Policy from a BIG-IP to another BIG-IP
-[This lab]() is a variant of the [previous one](https://github.com/fchmainy/awaf_tf_docs/blob/main/2.import/README.md). It takes a manualy managed A.WAF Policy from an existig BIG-IP and migrate it to a different BIG-IP through Terraform resources.
+[This lab]() is a variant of the [previous one](https://github.com/fchmainy/awaf_tf_docs/tree/main/3.migrate). It takes a manualy managed A.WAF Policy from an existig BIG-IP and migrate it to a different BIG-IP through Terraform resources.
 
 Now we have 2 BIG-IPs having 2 distincts A.WAF resources but sharing the same specifications and objects so this scenario is also the perfect fit for qualifcations & productions environments. 
 
 
 ------
+### Scenario #4: Managing an A.WAF Policy on a different devices 
+The goal of [this lab](https://github.com/fchmainy/awaf_tf_docs/tree/main/3.migrate)) is to manage an A.WAF Policy on multiple devices. It can be:
+- different standalone devices serving the same applications
+- different devices serving different purposes, for example changes tested first on a QA/Test BIG-IP before applying into production.
+
+
+------
+### Scenario #5: Managing an A.WAF Policy with Policy Builder 
+The goal of [this lab](https://github.com/fchmainy/awaf_tf_docs/tree/main/3.migrate)) is to manage an A.WAF Policy on multiple devices. It can be:
+- different standalone devices serving the same applications
+- different devices serving different purposes, for example changes tested first on a QA/Test BIG-IP before applying into production.
+
+
