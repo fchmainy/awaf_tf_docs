@@ -111,7 +111,7 @@ func main() {
 	fullName := "/" + partition + "/" + policyName
 	policyId := Hasher(fullName)
 
-	r := strings.NewReplacer("/", "_", "-", "_")
+	r := strings.NewReplacer("/", "_", "-", "_", "+", "-")
 	fmt.Println("Policy Id: ", r.Replace(policyId))
 }
 ```
