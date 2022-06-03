@@ -105,219 +105,62 @@ foo@bar:~$ terraform apply "scenario5"
 ## Simulate a WAF Policy workflow
 
 Here is a typical workflow:
- - the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions (the WAF Polciy we downloaded from the GitHub repo already contains Policy Builder suggestions so we do not have to generate traffic for this example).
- - once the cleaning is done, the terraform engineer (also yourself :) ) creates a unique **bigip_waf_pb_suggestions** data source issue a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
-Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.
+ 1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions (the WAF Polciy we downloaded from the GitHub repo already contains Policy Builder suggestions so we do not have to generate traffic for this example).
+ 2. once the cleaning is done, the terraform engineer (also yourself :) ) creates a unique **bigip_waf_pb_suggestions** data source issue a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
 
+*Note: Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.*
 
- - enforcing attack signatures on the QA environment
- - checking if these changes does not break the application and identify potential False Positives
- - applying the changes on QA before applying them on Production
+### 1. Go to your BIG-IP WebUI and clean the irrelevant suggestions
+:warning: **IMPORTANT** you can ignore suggestions but you should never accept them on the WebUI, otherwise you will then have to reconciliate the changes between the WAF Policy on the BIG-IP and the latest known WAF Policy in your terraform state.
 
-### Enforcing attack signatures on the QA environment
+For example, remove all the suggestions with a scoring = 1%
+
+### 2. Use Terraform to enforce the policy builder suggestions
+
 
 Create a **suggestions.tf** file:
 
+the name of the **bigip_waf_pb_suggestions** data source should be unique so we can track what modifications have been enforced and when it was.
+
 ```terraform
-variable "signatures" {
-  type            = map(object({
- 	signature_id  	= integer
-	name 		        = string
-	description	    = string
-  }))
+data "bigip_waf_pb_suggestions" "03JUN20221715" {
+  policy_name            = "scenario5"
+  partition              = "Common"
+  minimum_learning_score = 100
 }
 
-signatures = {
-    200000070 = {
-        signature_id 	= 200000070
-        description 	= 'SQL-INJ "master.." database (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000071 = {
-        signature_id 	= 200000071
-        description 	= 'SQL-INJ "master.." database (Parameters)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000072 = {
-        signature_id 	= 200000072
-        description 	= 'SQL-INJ "UNION SELECT" (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000073 = {
-        signature_id 	= 200000073
-        description 	= 'SQL-INJ "UNION SELECT" (Parameter)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000076 = {
-        signature_id 	= 200000076
-        description 	= 'SQL-INJ "mysql" (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-}
-
-data "bigip_waf_signatures" "map" {
-  for_each		= var.signatures
-  
-  signature_id		= each.value["signature_id"]
-  description		= each.value["description"]
-  enabled		= each.value["enabled"]
-  perform_staging	= each.value["perform_staging"]
+output "03JUN20221715" {
+	value	= bigip_waf_pb_suggestions.03JUN20221715.json
 }
 ```
 
+You can check here the suggestions before they are applied to the BIG-IP:
+
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
+
+foo@bar:~$ terraform apply "scenario5"
+
+foo@bar:~$ terraform output 03JUN20221715 | jq .
+```
 
 update the **main.tf** file:
 
 ```terraform
-resource "bigip_waf_policy" "s4_qa" {
+resource "bigip_waf_policy" "this" {
     application_language = "utf-8"
     name                 = "/Common/scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = [data.bigip_waf_signatures.map.*.json]
-}
-
-resource "bigip_waf_policy" "s4_prod" {
-    application_language = "utf-8"
-    name                 = "/Common/scenario4"
-    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
-    type                 = "security"
-    policy_import_json   = data.http.scenario4.body
+    suggestions		 = [data.bigip_waf_pb_suggestions.03JUN20221715.json]
 }
 ```
 
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
-
-foo@bar:~$ terraform apply "scenario4"
-```
-
-We can verify that the 5 attack signatures have been enabled and enforced on the scenario4 WAF Policy on the QA BIG-IP.
-
-Now, the applicatiopn owner identified that these last changes on the QA device have introduced some FP. Using the log events on the A.WAF GUI, we identified that :
- - the attack signature **"200000073"** should be disabled globally
- - the attack signature **"200000070"** should be disabled for the **"/U1"** URL 
- - the attack signaure **"200000071"** should be disabled at the parameter **"P1"** defined under the **"/U1"** URL.
- 
- so we can proceed to the final changes before enforcing into production:
- 
-**signatures.tf** file:
-
-```terraform
-variable "signatures" {
-  type = map(object({
- 	signature_id  	= integer
-	name 		= string
-	description	= string
-  }))
-}
-
-signatures = {
-    200000070 = {
-        signature_id 	= 200000070
-        description 	= 'SQL-INJ "master.." database (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000071 = {
-        signature_id 	= 200000071
-        description 	= 'SQL-INJ "master.." database (Parameters)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000072 = {
-        signature_id 	= 200000072
-        description 	= 'SQL-INJ "UNION SELECT" (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000073 = {
-        signature_id 	= 200000073
-        description 	= 'SQL-INJ "UNION SELECT" (Parameter)'
-	enabled		= false
-	perform_staging	= false
-    }
-    200000076 = {
-        signature_id 	= 200000076
-        description 	= 'SQL-INJ "mysql" (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-}
-
-data "bigip_waf_signatures" "map" {
-  for_each		= var.signatures
-  
-  signature_id		= each.value["signature_id"]
-  description		= each.value["description"]
-  enabled		= each.value["enabled"]
-  perform_staging	= each.value["perform_staging"]
-}
-```
-
-**parameters.tf** file:
-
-```terraform
-data "bigip_waf_entity_parameter" "P1" {
-  name            		= "P1"
-  type            		= "explicit"
-  data_type       		= "alpha-numeric"
-  perform_staging 		= true
-  signature_overrides_disable 	= [200000071]
-  url		  		= data.bigip_waf_entity_url.U1
-}
-```
-
-**urls.tf** file:
-
-```terraform
-data "bigip_waf_entity_url" "U1" {
-  name		              	= "/U1"
-  type                        	= "explicit"
-  perform_staging             	= false
-  signature_overrides_disable 	= [200000070]
-}
-```
-
-
-update the **main.tf** file:
-
-```terraform
-resource "bigip_waf_policy" "s4_qa" {
-    application_language = "utf-8"
-    name                 = "/Common/scenario4"
-    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
-    type                 = "security"
-    policy_import_json   = data.http.scenario4.body
-    signatures		 = [data.bigip_waf_signatures.map.*.json]
-    parameters		 = [data.bigip_waf_entity_parameter.P1.json]
-    urls		 = [data.bigip_waf_entity_url.U1.json]
-}
-
-resource "bigip_waf_policy" "s4_prod" {
-    application_language = "utf-8"
-    name                 = "/Common/scenario4"
-    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
-    type                 = "security"
-    policy_import_json   = data.http.scenario4.body
-    signatures		 = [data.bigip_waf_signatures.map.*.json]
-    parameters		 = [data.bigip_waf_entity_parameter.P1.json]
-    urls		 = [data.bigip_waf_entity_url.U1.json]
-}
-```
-
-now, plan & apply!:
-
-```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
 
 foo@bar:~$ terraform apply "scenario4"
 ```
