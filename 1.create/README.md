@@ -142,6 +142,8 @@ Now, your WAF Policy might evolve over time. You  may want to add entities, mana
 
 ## Policy lifecycle management
 
+### Parameters management
+
 Create a **parameters.tf** file:
 
 ```terraform
@@ -187,59 +189,103 @@ run it:
 
 ```console
 foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario1
-bigip_waf_policy.this: Refreshing state... [id=41UMLL7yDtzoa0000Wimzw]
+[...]
 
-Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
-  ~ update in-place
+Plan: 0 to add, 1 to change, 0 to destroy.
 
-Terraform will perform the following actions:
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
+Saved the plan to: scenario1
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "scenario1"
+
+foo@bar:~$ terraform apply "scenario1"
+bigip_waf_policy.this: Modifying... [id=41UMLL7yDtzoa0000Wimzw]
+bigip_waf_policy.this: Still modifying... [id=41UMLL7yDtzoa0000Wimzw, 10s elapsed]
+bigip_waf_policy.this: Modifications complete after 17s [id=41UMLL7yDtzoa0000Wimzw]
+
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
+```
+
+### Signatures Management
+
+
+
+We are creating a separate signature definition file with 3 signatures:
+ - S1 enables and perform staging on the **200010293** attack signature.
+ - S2 disables the **200009024** attack signature.
+ - S3 enables and enforce the **200014009** attack signature.
+
+
+Create a **signatures.tf** file:
+```terraform
+data "bigip_waf_signatures" "S1" {
+  signature_id     = 200010293
+  description      = "Java Code Execution"
+  enabled          = true
+  perform_staging  = true
+}
+
+data "bigip_waf_signatures" "S2" {
+  signature_id      = 200009024
+  enabled          = false
+}
+
+data "bigip_waf_signatures" "S3" {
+  signature_id      = 200014009
+  description      = "src http: (Header)"
+  enabled          = true
+  perform_staging  = false
+}
+```
+
+And add references to these parameters in the **"bigip_waf_policy"** TF resource in the **main.tf** file:
+
+```terraform
+resource "bigip_waf_policy" "this" {
+  name                 = "/Common/scenario1"
+  template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+  application_language = "utf-8"
+  enforcement_mode     = "blocking"
+  server_technologies  = ["MySQL", "Unix/Linux", "MongoDB"]
+  parameters           = [data.bigip_waf_entity_parameter.P1.json, data.bigip_waf_entity_parameter.P2.json, data.bigip_waf_entity_parameter.P3.json]
+  signatures           = [data.bigip_waf_signatures.S1.json, data.bigip_waf_signatures.S2.json, data.bigip_waf_signatures.S3.json]
+}
+```
+
+run it:
+
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario1
+[...]
   # bigip_waf_policy.this will be updated in-place
   ~ resource "bigip_waf_policy" "this" {
-        id                   = "41UMLL7yDtzoa0000Wimzw"
-        name                 = "/Common/scenario1"
-      + parameters           = [
+        id                   = "tCwXEedPDS-S35Bl4TSU5w"
+        name                 = "localS1"
+      + signatures           = [
           + jsonencode(
                 {
-                  + dataType       = "alpha-numeric"
-                  + name           = "Parameter1"
+                  + enabled        = true
                   + performStaging = true
-                  + type           = "explicit"
+                  + signatureId    = 200010293
                 }
             ),
           + jsonencode(
                 {
-                  + dataType           = "alpha-numeric"
-                  + name               = "Parameter2"
-                  + signatureOverrides = [
-                      + {
-                          + enabled            = false
-                          + signatureReference = {
-                              + signatureId = 200001494
-                            }
-                        },
-                      + {
-                          + enabled            = false
-                          + signatureReference = {
-                              + signatureId = 200001472
-                            }
-                        },
-                    ]
-                  + type               = "wildcard"
+                  + performStaging = false
+                  + signatureId    = 200009024
                 }
             ),
           + jsonencode(
                 {
-                  + dataType           = "alpha-numeric"
-                  + isHeader           = true
-                  + name               = "Parameter3"
-                  + performStaging     = true
-                  + sensitiveParameter = true
-                  + type               = "explicit"
+                  + enabled        = true
+                  + performStaging = false
+                  + signatureId    = 200014009
                 }
             ),
         ]
-        # (9 unchanged attributes hidden)
+        # (11 unchanged attributes hidden)
     }
 
 Plan: 0 to add, 1 to change, 0 to destroy.
@@ -259,4 +305,37 @@ bigip_waf_policy.this: Modifications complete after 17s [id=41UMLL7yDtzoa0000Wim
 Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
 ```
 
-Of course, what we have done by adding parameters in the **parameters.tf** file can also be done with URLs, filetypes and attack signatures using the data sources and resources defintions as it is documented in the [bigip terraform provider official documentation](https://registry.terraform.io/providers/F5Networks/bigip/latest/docs).
+At any time you can check the details on a specific Attack signature:
+
+```console
+$ terraform show -json | jq '.values.root_module.resources[] | select(.name == "S3")'
+```
+
+```json
+{
+  "address": "data.bigip_waf_signatures.S3",
+  "mode": "data",
+  "type": "bigip_waf_signatures",
+  "name": "S3",
+  "provider_name": "terraform.local/local/bigip",
+  "schema_version": 0,
+  "values": {
+    "accuracy": "medium",
+    "description": "Summary:\nThis event is generated when an attempt is made to abuse a web server functionality. This is a general detection signature (i.e. it is not specific to any web application).\n\nImpact:\nVary from information gathering to web server compromise.\n\nDetailed Information:\nAbuse of Functionality is an attack technique that uses a web site's own features and functionality to consume, defraud, or circumvents access controls mechanisms\n\nAffected Systems:\nAll systems.\n\nAttack Scenarios:\nThere are many possible.\n\nEase Of Attack:\nSimple to medium.\n\nFalse Positives:\nSome applications may accept valid input which matches these signatures.\n\nFalse Negatives:\nNone known.\n\nCorrective Action:\nEnsure the system is using an up to date version of the software and has had all vendor supplied patches applied. Utilize \"Positive Security Model\" by accepting only known types of input in web application.\n\nAdditional References:\nhttp://www.webappsec.org/projects/threat/classes/abuse_of_functionality.shtml\n\n",
+    "enabled": true,
+    "id": "200014009",
+    "json": "{\"signatureId\":200014009,\"performStaging\":false,\"enabled\":true}",
+    "name": "Unix \"cmd\" parameter execution attempt",
+    "perform_staging": false,
+    "risk": "high",
+    "signature_id": 200014009,
+    "system_signature_id": "GTK2ItJX6pnKHXBqiwtlxQ",
+    "tag": null,
+    "type": "request"
+  },
+  "sensitive_values": {}
+}
+```
+
+
+[bigip terraform provider official documentation](https://registry.terraform.io/providers/F5Networks/bigip/latest/docs).
