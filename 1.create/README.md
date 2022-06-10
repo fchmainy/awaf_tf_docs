@@ -60,7 +60,7 @@ resource "bigip_waf_policy" "this" {
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
   application_language = "utf-8"
   enforcement_mode     = "blocking"
-  server_technologies  = ["MySQL", "Unix/Linux", "MongoDB"]
+  server_technologies  = ["Apache Tomcat", "MySQL", "Unix/Linux"]
 }
 ```
 
@@ -142,6 +142,23 @@ Now, your WAF Policy might evolve over time. You  may want to add entities, mana
 
 ## Policy lifecycle management
 
+### Server Technologies
+
+You want now to add a **MongoDB** server technology into your WAF Policy.
+The allowed values for server technologies are listed in the [Declarative WAF API documentation](https://clouddocs.f5.com/products/waf-declarative-policy/declarative_policy_v16_1.html#server-technologies)
+
+edit the **main.tf** file:
+```terraform
+resource "bigip_waf_policy" "this" {
+  name                 = "localS1"
+  partition	       = "Common"
+  template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+  application_language = "utf-8"
+  enforcement_mode     = "blocking"
+  server_technologies  = ["Apache Tomcat", "MySQL", "Unix/Linux", "MongoDB"]
+  }
+```
+
 ### Parameters management
 
 Create a **parameters.tf** file:
@@ -180,7 +197,7 @@ resource "bigip_waf_policy" "this" {
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
   application_language = "utf-8"
   enforcement_mode     = "blocking"
-  server_technologies  = ["MySQL", "Unix/Linux", "MongoDB"]
+  server_technologies  = ["Apache Tomcat", "MySQL", "Unix/Linux", "MongoDB"]
   parameters           = [data.bigip_waf_entity_parameter.P1.json, data.bigip_waf_entity_parameter.P2.json, data.bigip_waf_entity_parameter.P3.json]
 }
 ```
@@ -240,7 +257,7 @@ data "bigip_waf_signatures" "S3" {
 }
 ```
 
-And add references to these parameters in the **"bigip_waf_policy"** TF resource in the **main.tf** file:
+And add references to these attack signatures in the **"bigip_waf_policy"** TF resource in the **main.tf** file:
 
 ```terraform
 resource "bigip_waf_policy" "this" {
@@ -248,7 +265,7 @@ resource "bigip_waf_policy" "this" {
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
   application_language = "utf-8"
   enforcement_mode     = "blocking"
-  server_technologies  = ["MySQL", "Unix/Linux", "MongoDB"]
+  server_technologies  = ["Apache Tomcat", "MySQL", "Unix/Linux", "MongoDB"]
   parameters           = [data.bigip_waf_entity_parameter.P1.json, data.bigip_waf_entity_parameter.P2.json, data.bigip_waf_entity_parameter.P3.json]
   signatures           = [data.bigip_waf_signatures.S1.json, data.bigip_waf_signatures.S2.json, data.bigip_waf_signatures.S3.json]
 }
