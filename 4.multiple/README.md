@@ -134,48 +134,17 @@ Create a **signatures.tf** file:
 ```terraform
 variable "signatures" {
   type = map(object({
- 	signature_id  	= integer
-	name 		= string
-	description	= string
+        signature_id    = number
+	enabled		= bool
+	perform_staging	= bool
+        description     = string
   }))
 }
 
-signatures = {
-    200000070 = {
-        signature_id 	= 200000070
-        description 	= 'SQL-INJ "master.." database (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000071 = {
-        signature_id 	= 200000071
-        description 	= 'SQL-INJ "master.." database (Parameters)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000072 = {
-        signature_id 	= 200000072
-        description 	= 'SQL-INJ "UNION SELECT" (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000073 = {
-        signature_id 	= 200000073
-        description 	= 'SQL-INJ "UNION SELECT" (Parameter)'
-	enabled		= true
-	perform_staging	= false
-    }
-    200000076 = {
-        signature_id 	= 200000076
-        description 	= 'SQL-INJ "mysql" (Headers)'
-	enabled		= true
-	perform_staging	= false
-    }
-}
 
 data "bigip_waf_signatures" "map" {
   for_each		= var.signatures
-  
+
   signature_id		= each.value["signature_id"]
   description		= each.value["description"]
   enabled		= each.value["enabled"]
@@ -183,8 +152,46 @@ data "bigip_waf_signatures" "map" {
 }
 ```
 
+in order to ease the tracking of attack signature changes, we are using here a terraform hcl map.
+Add this signature list definition in the **inputs.tfvars** file:
 
-update the **main.tf** file:
+```terraform
+signatures = {
+    200101559 = {
+        signature_id    = 200101559
+        description     = "src http: (Header)"
+        enabled         = true
+        perform_staging = false
+    }
+    200101558 = {
+        signature_id    = 200101558
+        description     = "src http: (Parameter)"
+        enabled         = true
+        perform_staging = false
+    }
+    200003067 = {
+        signature_id    = 200003067
+        description     = "\"/..namedfork/data\" execution attempt (Headers)"
+        enabled         = true
+        perform_staging = false
+    }
+    200003066 = {
+        signature_id    = 200003066
+        description     = "\"/..namedfork/data\" execution attempt (Parameters)"
+        enabled         = true
+        perform_staging = false
+    }
+    200003068 = {
+        signature_id    = 200003068
+        description     = "\"/..namedfork/data\" execution attempt (URI)"
+        enabled         = true
+        perform_staging = false
+    }
+}
+```
+
+
+and finally, update the **main.tf** file:
 
 ```terraform
 resource "bigip_waf_policy" "s4_qa" {
@@ -193,7 +200,7 @@ resource "bigip_waf_policy" "s4_qa" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = [data.bigip_waf_signatures.map.*.json]
+    signatures           = [ for k,v in data.bigip_waf_signatures.map: v.json ]
 }
 
 resource "bigip_waf_policy" "s4_prod" {
@@ -213,66 +220,49 @@ foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
 foo@bar:~$ terraform apply "scenario4"
 ```
 
-We can verify that the 5 attack signatures have been enabled and enforced on the scenario4 WAF Policy on the QA BIG-IP.
+We can verify that the 5 attack signatures have been enabled and enforced on the scenario4 WAF Policy on the QA BIG-IP (first 5 lines in the attack signatures list of the A.WAF Policy).
 
 Now, the applicatiopn owner identified that these last changes on the QA device have introduced some FP. Using the log events on the A.WAF GUI, we identified that :
- - the attack signature **"200000073"** should be disabled globally
- - the attack signature **"200000070"** should be disabled for the **"/U1"** URL 
- - the attack signaure **"200000071"** should be disabled at the parameter **"P1"** defined under the **"/U1"** URL.
+ - the attack signature **"200101558"** should be disabled globally
+ - the attack signature **"200003068"** should be disabled for the **"/U1"** URL 
+ - the attack signaure **"200003067"** should be enabled globally but disabled specifically for the parameter **"P1"**.
  
  so we can proceed to the final changes before enforcing into production:
  
-**signatures.tf** file:
+**inputs.tfvars** file:
 
 ```terraform
-variable "signatures" {
-  type = map(object({
- 	signature_id  	= integer
-	name 		= string
-	description	= string
-  }))
-}
-
 signatures = {
-    200000070 = {
-        signature_id 	= 200000070
-        description 	= 'SQL-INJ "master.." database (Headers)'
-	enabled		= true
-	perform_staging	= false
+    200101559 = {
+        signature_id    = 200101559
+        description     = "src http: (Header)"
+        enabled         = true
+        perform_staging = false
     }
-    200000071 = {
-        signature_id 	= 200000071
-        description 	= 'SQL-INJ "master.." database (Parameters)'
-	enabled		= true
-	perform_staging	= false
+    200101558 = {
+        signature_id    = 200101558
+        description     = "src http: (Parameter)"
+        enabled         = false
+        perform_staging = false
     }
-    200000072 = {
-        signature_id 	= 200000072
-        description 	= 'SQL-INJ "UNION SELECT" (Headers)'
-	enabled		= true
-	perform_staging	= false
+    200003067 = {
+        signature_id    = 200003067
+        description     = "\"/..namedfork/data\" execution attempt (Headers)"
+        enabled         = true
+        perform_staging = false
     }
-    200000073 = {
-        signature_id 	= 200000073
-        description 	= 'SQL-INJ "UNION SELECT" (Parameter)'
-	enabled		= false
-	perform_staging	= false
+    200003066 = {
+        signature_id    = 200003066
+        description     = "\"/..namedfork/data\" execution attempt (Parameters)"
+        enabled         = true
+        perform_staging = false
     }
-    200000076 = {
-        signature_id 	= 200000076
-        description 	= 'SQL-INJ "mysql" (Headers)'
-	enabled		= true
-	perform_staging	= false
+    200003068 = {
+        signature_id    = 200003068
+        description     = "\"/..namedfork/data\" execution attempt (URI)"
+        enabled         = true
+        perform_staging = false
     }
-}
-
-data "bigip_waf_signatures" "map" {
-  for_each		= var.signatures
-  
-  signature_id		= each.value["signature_id"]
-  description		= each.value["description"]
-  enabled		= each.value["enabled"]
-  perform_staging	= each.value["perform_staging"]
 }
 ```
 
@@ -284,8 +274,8 @@ data "bigip_waf_entity_parameter" "P1" {
   type            		= "explicit"
   data_type       		= "alpha-numeric"
   perform_staging 		= true
-  signature_overrides_disable 	= [200000071]
-  url		  		= data.bigip_waf_entity_url.U1
+  signature_overrides_disable 	= [200003067]
+  //url		  		= data.bigip_waf_entity_url.U1
 }
 ```
 
@@ -296,7 +286,7 @@ data "bigip_waf_entity_url" "U1" {
   name		              	= "/U1"
   type                        	= "explicit"
   perform_staging             	= false
-  signature_overrides_disable 	= [200000070]
+  signature_overrides_disable 	= [200003068]
 }
 ```
 
@@ -310,7 +300,7 @@ resource "bigip_waf_policy" "s4_qa" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = [data.bigip_waf_signatures.map.*.json]
+    signatures		 = [ for k,v in data.bigip_waf_signatures.map: v.json ]
     parameters		 = [data.bigip_waf_entity_parameter.P1.json]
     urls		 = [data.bigip_waf_entity_url.U1.json]
 }
@@ -321,7 +311,7 @@ resource "bigip_waf_policy" "s4_prod" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = [data.bigip_waf_signatures.map.*.json]
+    signatures		 = [ for k,v in data.bigip_waf_signatures.map: v.json ]
     parameters		 = [data.bigip_waf_entity_parameter.P1.json]
     urls		 = [data.bigip_waf_entity_url.U1.json]
 }
