@@ -1,11 +1,18 @@
+<div align="center">
+
 # Scenario #5: Managing an A.WAF Policy with Policy Builder on a single device
 
+</div>
+
+</br></br>
 
 ## Goals
 The goal of this lab is to manage Policy Builder Suggestions an A.WAF Policy on a single device or cluster. As the traffic flows through the BIG-IP, it is easy to manage suggestions from the Policy Builder and enforce them on the WAF Policy. It also shows what can be the management workflow:
  - the security engineer regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions.
  - once the cleaning is done, the terraform engineer (who can also be the security engineer btw) issue a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
  - Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.
+
+</br></br>
 
 ## Pre-requisites
 
@@ -21,6 +28,7 @@ The goal of this lab is to manage Policy Builder Suggestions an A.WAF Policy on 
  - [ ] use of F5 bigip provider version 1.14.0 minimal
  - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
+</br></br>
 
 ## Policy Creation
 
@@ -100,7 +108,7 @@ foo@bar:~$ terraform apply "scenario5"
 ```
 
 
-===
+</br></br>
 
 ## Simulate a WAF Policy workflow
 
@@ -114,6 +122,9 @@ Here is a typical workflow:
 :warning: **IMPORTANT** you can ignore suggestions but you should never accept them on the WebUI, otherwise you will then have to reconciliate the changes between the WAF Policy on the BIG-IP and the latest known WAF Policy in your terraform state.
 
 For example, remove all the suggestions with a scoring = 1%
+
+</br></br>
+
 
 ### 2. Use Terraform to enforce the policy builder suggestions
 
