@@ -32,7 +32,9 @@ The goal of this lab is to manage Policy Builder Suggestions an A.WAF Policy on 
 
 ## Policy Creation
 
-Create 4 files:
+We already have exported a WAF Policy called **scenario5.json** [available here](https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/0.Appendix/scenario5_wLearningSuggestions.json) including several Policy Builder Suggestions so you won't have to generate traffic.
+
+So you have to create 4 files:
 
 **variables.tf**
 ```terraform
@@ -41,7 +43,7 @@ variable username {}
 variable password {}
 ```
 
-**inputs.tfvars**
+**inputs.auto.tfvars**
 ```terraform
 prod_bigip = "10.1.1.9:8443"
 username = "admin"
@@ -67,7 +69,7 @@ provider "bigip" {
 }
 
 data "http" "scenario5" {
-  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/4.multiple/lab/Common_scenario4__2022-6-2_13-38-14__production.f5demo.com.json?token=GHSAT0AAAAAABMHNSKUQZBAYO7NCJUZBEF6YUYUHVA"
+  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/0.Appendix/scenario5_wLearningSuggestions.json"
   request_headers = {
   	Accept = "application/json"
   }
@@ -95,7 +97,7 @@ output "policyJSON" {
         value   = bigip_waf_policy.this.policy_export_json
 }
 ```
-Here, we are referencing an existing policy from a GitHub repository but it can also be created from zero on both BIG-IPs.
+
 
 Now initialize, plan and apply your new Terraform project.
 ```console
@@ -113,28 +115,32 @@ foo@bar:~$ terraform apply "scenario5"
 ## Simulate a WAF Policy workflow
 
 Here is a typical workflow:
- 1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions (the WAF Polciy we downloaded from the GitHub repo already contains Policy Builder suggestions so we do not have to generate traffic for this example).
- 2. once the cleaning is done, the terraform engineer (also yourself :) ) creates a unique **bigip_waf_pb_suggestions** data source issue a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
+You should have 22 Learning Suggestions with your WAF Policy.
+
+ 1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions. Let's say we will remove the following suggestion:
+	* **Enable HTTP Protocol Compliace Check** HTTP Check: Check maximum number of parameters
+
+ 2. once the cleaning is done, the terraform engineer (here it is also yourself :) but in a real life he can be a different individual) creates a unique **bigip_waf_pb_suggestions** data source before issuing a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
 
 *Note: Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.*
+
+</br>
 
 ### 1. Go to your BIG-IP WebUI and clean the irrelevant suggestions
 :warning: **IMPORTANT** you can ignore suggestions but you should never accept them on the WebUI, otherwise you will then have to reconciliate the changes between the WAF Policy on the BIG-IP and the latest known WAF Policy in your terraform state.
 
 For example, remove all the suggestions with a scoring = 1%
 
-</br></br>
-
+</br>
 
 ### 2. Use Terraform to enforce the policy builder suggestions
-
 
 Create a **suggestions.tf** file:
 
 the name of the **bigip_waf_pb_suggestions** data source should be unique so we can track what modifications have been enforced and when it was.
 
 ```terraform
-data "bigip_waf_pb_suggestions" "03JUN20221715" {
+data "bigip_waf_pb_suggestions" "03JUL20221715" {
   policy_name            = "scenario5"
   partition              = "Common"
   minimum_learning_score = 100
@@ -153,6 +159,8 @@ foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
 foo@bar:~$ terraform apply "scenario5"
 
 foo@bar:~$ terraform output 03JUN20221715 | jq .
+
+foo@bar:~$ terraform output 03JUN20221715 | jq '. | length'
 ```
 
 update the **main.tf** file:
@@ -173,5 +181,5 @@ now, plan & apply!:
 ```console
 foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
 
-foo@bar:~$ terraform apply "scenario4"
+foo@bar:~$ terraform apply "scenario5"
 ```
