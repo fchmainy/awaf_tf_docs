@@ -28,7 +28,7 @@ from hashlib import md5
 import base64
 
 pname = "/Common/p1"
-base64.b64encode(md5(pname.encode()).digest()).replace("=", "")
+print base64.b64encode(md5(pname.encode()).digest()).replace("=", "")
 ```
 
 ```console
