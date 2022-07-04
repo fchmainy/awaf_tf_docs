@@ -18,7 +18,7 @@ The goal of this lab) is to manage an A.WAF Policy on multiple devices. It can b
 **on Terraform:**
 
  - [ ] use of F5 bigip provider version 1.14.0 minimal
- - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
+ - [ ] use of Hashicorp version following [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 
 ## Policy Creation
@@ -65,7 +65,7 @@ provider "bigip" {
 }
 
 data "http" "scenario4" {
-  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/4.multiple/lab/Common_scenario4__2022-6-2_13-38-14__production.f5demo.com.json?token=GHSAT0AAAAAABMHNSKUQZBAYO7NCJUZBEF6YUYUHVA"
+  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/0.Appendix/scenario4.json"
   request_headers = {
   	Accept = "application/json"
   }
