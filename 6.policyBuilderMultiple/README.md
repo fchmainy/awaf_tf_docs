@@ -227,54 +227,29 @@ Now you can test your application through the QA device.
 check https://qa.f5demo.fch and see that the application is not broken and attacks are blocked*
 
 
+### 4. Enforce suggestions on the Production devices
 
-You should have 22 Learning Suggestions with your WAF Policy.
+Here, there are two ways we can consider this step:
 
- 1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions. Let's say we will remove the following suggestion:
-	* **Enable HTTP Protocol Compliace Check** HTTP Check: Check maximum number of parameters
+ a) the QA device WAF Policy should be 100% consistent with production devices
+ b) the QA device WAF Policy has differences with production devices (IP exceptions for example)
 
- 2. once the cleaning is done, the terraform engineer (here it is also yourself :) but in a real life he can be a different individual) creates a unique **bigip_waf_pb_suggestions** data source before issuing a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
+#### a) QA.WAF == PROD.WAF
 
-*Note: Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.*
+That is the easiest way. After validating the suggestions and removing the potential False Positives (remember, if you enforce a suggestion with a low  Learning score, you have no guarantee on the accuracy of that suggestion)
 
-</br>
+In this case, update the **main.tf** file
 
-### 1. Go to your BIG-IP WebUI and clean the irrelevant suggestions
-:warning: **IMPORTANT** you can ignore suggestions but you should never accept them on the WebUI, otherwise you will then have to reconciliate the changes between the WAF Policy on the BIG-IP and the latest known WAF Policy in your terraform state.
 
-For example, remove all the suggestions with a scoring = 1%
+[ IAMHERE ]
 
-</br>
 
-### 2. Use Terraform to enforce the policy builder suggestions
 
-Create a **suggestions.tf** file:
+#### a) QA.WAF != PROD.WAF
 
-the name of the **bigip_waf_pb_suggestions** data source should be unique so we can track what modifications have been enforced and when it was.
 
-```terraform
-data "bigip_waf_pb_suggestions" "03JUL20221715" {
-  policy_name            = "scenario5"
-  partition              = "Common"
-  minimum_learning_score = 100
-}
 
-output "03JUN20221715" {
-	value	= bigip_waf_pb_suggestions.03JUN20221715.json
-}
-```
 
-You can check here the suggestions before they are applied to the BIG-IP:
-
-```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
-
-foo@bar:~$ terraform apply "scenario5"
-
-foo@bar:~$ terraform output 03JUN20221715 | jq .
-
-foo@bar:~$ terraform output 03JUN20221715 | jq '. | length'
-```
 
 update the **main.tf** file:
 
