@@ -156,7 +156,7 @@ resource "bigip_waf_policy" "this" {
   application_language = "utf-8"
   enforcement_mode     = "blocking"
   server_technologies  = ["Apache Tomcat", "MySQL", "Unix/Linux", "MongoDB"]
-  }
+}
 ```
 
 ### Parameters management
