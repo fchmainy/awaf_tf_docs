@@ -49,11 +49,11 @@ variable password {}
 
 **inputs.auto.tfvars**
 ```terraform
-prod_dc1_bigip = "10.1.1.9:8443"
-prod_cloud_bigip = "10.1.1.10:8443"
-qa_bigip = "10.1.1.11:8443"
+prod_dc1_bigip = "10.1.1.4"
+prod_cloud_bigip = "10.1.1.7"
+qa_bigip = "10.1.1.9"
 username = "admin"
-password = "whatIsYourBigIPPassword?"
+password = "WhatisYourPassword?"
 ```
 
 **main.tf**
