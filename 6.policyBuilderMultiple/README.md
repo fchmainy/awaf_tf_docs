@@ -40,7 +40,9 @@ So you have to create 4 files:
 
 **variables.tf**
 ```terraform
-variable prod_bigip {}
+variable prod_dc1_bigip {}
+variable prod_cloud_bigip {}
+variable qa_bigip {}
 variable username {}
 variable password {}
 ```
@@ -60,7 +62,7 @@ terraform {
   required_providers {
     bigip = {
       source = "F5Networks/bigip"
-      version = "1.14"
+      version = "1.15"
     }
   }
 }
