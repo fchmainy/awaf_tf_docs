@@ -12,6 +12,7 @@ So the goal here is to **import** the current policy, which will be our current 
 
  - [ ] version 15.1 minimal
  - [ ] credentials with REST API access
+ - [ ] /Common/scenario2 WAF policy (Rapid deployment template) created
 
 
 **on Terraform:**
@@ -61,7 +62,8 @@ provider "bigip" {
 }
 
 resource "bigip_waf_policy" "this" {
-  name                 = "/Common/scenario2"
+  partition.           = "Common"
+  name                 = "scenario2"
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
 }
 ```
@@ -84,7 +86,9 @@ As you can see, we only define the two required attributes of the **"bigip_waf_p
 Just before we go. We need the Policy ID. There are multiple ways we can get it:
 - check on the iControl REST API Endpoint: /mgmt/tm/asm/policies?$filter=name+eq+**scenario2**&$select=id
 - get a script example in the lab/scripts/ folder
-- run the following piece of code in the [Go PlayGround](https://go.dev/play/)
+- using a Go code 
+
+run the following piece of code in the [Go PlayGround](https://go.dev/play/)
 
 ```golang
 package main
