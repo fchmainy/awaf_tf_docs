@@ -40,7 +40,7 @@ variable password {}
 
 **inputs.tfvars**
 ```terraform
-bigip = "10.1.1.9:8443"
+bigip = "10.1.1.9:443"
 username = "admin"
 password = "whatIsYourBigIPPassword?"
 ```
@@ -259,7 +259,7 @@ data "bigip_waf_entity_url" "U1" {
   name		              = "/URL1"
   description                 = "this is a test for URL1"
   type                        = "explicit"
-  protocol                    = "HTTP"
+  protocol                    = "http"
   perform_staging             = true
   signature_overrides_disable = [12345678, 87654321]
   method_overrides {
@@ -299,14 +299,14 @@ Create a **signatures.tf** file:
 
 ```terraform
 data "bigip_waf_signatures" "S1" {
-  signatureId      = 200104004
+  signature_id     = 200104004
   description      = "Java Code Execution"
   enabled          = true
   perform_staging  = true
 }
 
 data "bigip_waf_signatures" "S2" {
-  signatureId      = 200104005
+  signature_id     = 200104005
   enabled          = false
 }
 ```
