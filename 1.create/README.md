@@ -194,7 +194,8 @@ And add references to these parameters in the **"bigip_waf_policy"** TF resource
 
 ```terraform
 resource "bigip_waf_policy" "this" {
-  name                 = "/Common/scenario1"
+  name                 = "scenario1"
+  partition            = "Common"
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
   application_language = "utf-8"
   enforcement_mode     = "blocking"
