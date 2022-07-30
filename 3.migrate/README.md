@@ -49,8 +49,8 @@ variable password {}
 
 **inputs.tfvars**
 ```terraform
-previous_bigip = "10.1.1.4:8443"
-new_bigip = "10.1.1.9:8443"
+previous_bigip = "10.1.1.9:8443"
+new_bigip = "10.1.1.8:8443"
 username = "admin"
 password = "whatIsYourBigIPPassword?"
 ```
