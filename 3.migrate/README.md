@@ -25,7 +25,7 @@ The WAF Policy and its children objects (parameters, urls, attack signatures, ex
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.14.0 minimal
+ - [ ] use of F5 bigip provider version 1.15.0 minimal
  - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 
@@ -42,15 +42,15 @@ Create 4 files:
 **variables.tf**
 ```terraform
 variable previous_bigip {}
-variable latest_bigip {}
+variable new_bigip {}
 variable username {}
 variable password {}
 ```
 
 **inputs.tfvars**
 ```terraform
-previous_bigip = "10.1.1.4:8443"
-new_bigip = "10.1.1.9:8443"
+previous_bigip = "10.1.1.:443"
+new_bigip = "10.1.1.9:443"
 username = "admin"
 password = "whatIsYourBigIPPassword?"
 ```
@@ -61,7 +61,7 @@ terraform {
   required_providers {
     bigip = {
       source = "F5Networks/bigip"
-      version = "1.14"
+      version = "1.15"
     }
   }
 }
@@ -73,7 +73,7 @@ provider "bigip" {
 }
 provider "bigip" {
   alias    = "new"
-  address  = var.latest_bigip
+  address  = var.new_bigip
   username = var.username
   password = var.password
 }
@@ -81,7 +81,8 @@ provider "bigip" {
 
 resource "bigip_waf_policy" "current" {
   provider	           = bigip.old
-  name                 = "/Common/scenario3"
+  partition            = "Common"
+  name                 = "scenario3"
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
 }
 ```
@@ -91,11 +92,11 @@ resource "bigip_waf_policy" "current" {
 **outputs.tf**
 ```terraform
 output "policyId" {
-	value	= bigip_waf_policy.this.policy_id
+	value	= bigip_waf_policy.current.policy_id
 }
 
 output "policyJSON" {
-        value   = bigip_waf_policy.this.policy_export_json
+        value   = bigip_waf_policy.current.policy_export_json
 }
 ```
 
@@ -193,7 +194,8 @@ If you want to keep the policy on both BIG-IPs, [please get there](UPDATE LINK!!
 resource "bigip_waf_policy" "migrated" {
     provider	           = bigip.new
     application_language = "utf-8"
-    name                 = "/Common/scenario3"
+    partition            = "Common"
+    name                 = "scenario3"
     policy_id            = "YiEQ4l1Fw1U9UnB2-mTKWA"
     template_name        = "POLICY_TEMPLATE_COMPREHENSIVE"
     type                 = "security"
