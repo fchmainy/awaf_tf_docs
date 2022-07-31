@@ -25,7 +25,7 @@ The goal of this lab is to manage Policy Builder Suggestions an A.WAF Policy on 
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.14.0 minimal
+ - [ ] use of F5 bigip provider version 1.15.0 minimal
  - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 </br></br>
@@ -45,7 +45,7 @@ variable password {}
 
 **inputs.auto.tfvars**
 ```terraform
-prod_bigip = "10.1.1.9:8443"
+prod_bigip = "10.1.1.8:443"
 username = "admin"
 password = "whatIsYourBigIPPassword?"
 ```
@@ -56,7 +56,7 @@ terraform {
   required_providers {
     bigip = {
       source = "F5Networks/bigip"
-      version = "1.14"
+      version = "1.15"
     }
   }
 }
@@ -78,7 +78,8 @@ data "http" "scenario5" {
 resource "bigip_waf_policy" "this" {
     provider	           = bigip.prod
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario5"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario5.body
@@ -168,7 +169,8 @@ update the **main.tf** file:
 ```terraform
 resource "bigip_waf_policy" "this" {
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario5"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
