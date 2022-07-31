@@ -172,7 +172,7 @@ resource "bigip_waf_policy" "this" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    suggestions		 = [data.bigip_waf_pb_suggestions.03JUN20221715.json]
+    modifications		 = [data.bigip_waf_pb_suggestions.03JUN20221715.json]
 }
 ```
 
