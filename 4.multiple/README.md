@@ -17,7 +17,7 @@ The goal of this lab) is to manage an A.WAF Policy on multiple devices. It can b
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.14.0 minimal
+ - [ ] use of F5 bigip provider version 1.15.0 minimal
  - [ ] use of Hashicorp version following [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 
@@ -35,8 +35,8 @@ variable password {}
 
 **inputs.tfvars**
 ```terraform
-qa_bigip = "10.1.1.4:8443"
-prod_bigip = "10.1.1.9:8443"
+qa_bigip = "10.1.1.9:443"
+prod_bigip = "10.1.1.8:443"
 username = "admin"
 password = "whatIsYourBigIPPassword?"
 ```
@@ -47,7 +47,7 @@ terraform {
   required_providers {
     bigip = {
       source = "F5Networks/bigip"
-      version = "1.14"
+      version = "1.15"
     }
   }
 }
@@ -74,7 +74,8 @@ data "http" "scenario4" {
 resource "bigip_waf_policy" "s4_qa" {
     provider	    	 = bigip.qa
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
@@ -83,7 +84,8 @@ resource "bigip_waf_policy" "s4_qa" {
 resource "bigip_waf_policy" "s4_prod" {
     provider	         = bigip.prod
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
@@ -199,7 +201,8 @@ and finally, update the **main.tf** file:
 resource "bigip_waf_policy" "s4_qa" {
     provider	    	 = bigip.qa
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
@@ -209,7 +212,8 @@ resource "bigip_waf_policy" "s4_qa" {
 resource "bigip_waf_policy" "s4_prod" {
     provider	    	 = bigip.prod
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
@@ -300,7 +304,8 @@ update the **main.tf** file:
 ```terraform
 resource "bigip_waf_policy" "s4_qa" {
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
@@ -311,7 +316,8 @@ resource "bigip_waf_policy" "s4_qa" {
 
 resource "bigip_waf_policy" "s4_prod" {
     application_language = "utf-8"
-    name                 = "/Common/scenario4"
+    partition            = "Common"
+    name                 = "scenario4"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
