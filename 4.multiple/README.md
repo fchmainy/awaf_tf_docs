@@ -94,16 +94,6 @@ resource "bigip_waf_policy" "s4_prod" {
 *Note: the template name can be set to anything. When it is imported, we will overwrite the value*
 
 
-**outputs.tf**
-```terraform
-output "policyId" {
-	value	= bigip_waf_policy.this.policy_id
-}
-
-output "policyJSON" {
-        value   = bigip_waf_policy.this.policy_export_json
-}
-```
 Here, we are referencing an existing policy from a GitHub repository but it can also be created from zero on both BIG-IPs.
 
 Now initialize, plan and apply your new Terraform project.
