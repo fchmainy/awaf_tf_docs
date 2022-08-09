@@ -141,7 +141,7 @@ Create a **suggestions.tf** file:
 the name of the **bigip_waf_pb_suggestions** data source should be unique so we can track what modifications have been enforced and when it was.
 
 ```terraform
-data "bigip_waf_pb_suggestions" "03JUL20221715" {
+data "bigip_waf_pb_suggestions" "03JUN20221715" {
   policy_name            = "scenario5"
   partition              = "Common"
   minimum_learning_score = 100
@@ -168,6 +168,7 @@ update the **main.tf** file:
 
 ```terraform
 resource "bigip_waf_policy" "this" {
+    provider	         = bigip.prod
     application_language = "utf-8"
     partition            = "Common"
     name                 = "scenario5"
