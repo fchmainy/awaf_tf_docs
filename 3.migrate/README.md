@@ -316,14 +316,14 @@ Create a **signatures.tf** file:
 
 ```terraform
 data "bigip_waf_signatures" "S1" {
-  signatureId      = 200104004
+  signature_id     = 200104004
   description      = "Java Code Execution"
   enabled          = true
   perform_staging  = true
 }
 
 data "bigip_waf_signatures" "S2" {
-  signatureId      = 200104005
+  signature_id     = 200104005
   enabled          = false
 }
 ```
