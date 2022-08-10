@@ -33,7 +33,7 @@ variable username {}
 variable password {}
 ```
 
-**inputs.tfvars**
+**inputs.auto.tfvars**
 ```terraform
 qa_bigip = "10.1.1.9:443"
 prod_bigip = "10.1.1.8:443"
@@ -105,7 +105,7 @@ Initializing provider plugins...
 [...]
 Terraform has been successfully initialized!
 
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+foo@bar:~$ terraform plan -out scenario4
 
 foo@bar:~$ terraform apply "scenario4"
 
@@ -123,31 +123,8 @@ Here is a common workflow:
 
 ### Enforcing attack signatures on the QA environment
 
-Create a **signatures.tf** file:
-
-```terraform
-variable "signatures" {
-  type = map(object({
-        signature_id    = number
-	enabled		= bool
-	perform_staging	= bool
-        description     = string
-  }))
-}
-
-
-data "bigip_waf_signatures" "map" {
-  for_each		= var.signatures
-
-  signature_id		= each.value["signature_id"]
-  description		= each.value["description"]
-  enabled		= each.value["enabled"]
-  perform_staging	= each.value["perform_staging"]
-}
-```
-
-in order to ease the tracking of attack signature changes, we are using here a terraform hcl map.
-Add this signature list definition in the **inputs.tfvars** file:
+In order to facilitate the tracking of attack signature changes, we are using here a terraform hcl map.
+Add this signature list definition in the **inputs.auto.tfvars** file:
 
 ```terraform
 signatures = {
@@ -184,8 +161,41 @@ signatures = {
 }
 ```
 
+Now, we create a **signatures.tf** file with a map to all the attack signatures defied previously:
 
-and finally, update the **main.tf** file:
+```terraform
+variable "signatures" {
+  type = map(object({
+        signature_id    = number
+	enabled		= bool
+	perform_staging	= bool
+        description     = string
+  }))
+}
+
+
+data "bigip_waf_signatures" "map_qa" {
+  provider	        = bigip.qa
+  for_each		= var.signatures
+  signature_id		= each.value["signature_id"]
+  description		= each.value["description"]
+  enabled		= each.value["enabled"]
+  perform_staging	= each.value["perform_staging"]
+}
+
+data "bigip_waf_signatures" "map_prod" {
+  provider	        = bigip.prod
+  for_each		= var.signatures
+  signature_id		= each.value["signature_id"]
+  description		= each.value["description"]
+  enabled		= each.value["enabled"]
+  perform_staging	= each.value["perform_staging"]
+}
+```
+
+As you can see, we defined 2 different maps: one for the QA BIG-IP and one for the PRODUCTION BIG-IP because the "bigip_waf_signatures" data source are linked to their BIG-IP in order to have consistencies. Unlike the parameters and urls data sources which are just "json payload generators", the attack signature data sources has to read first the existence of the signatures id and their status on the BIG-IP before applying a configuration change.
+
+Now finally, update the **main.tf** file:
 
 ```terraform
 resource "bigip_waf_policy" "s4_qa" {
@@ -196,7 +206,7 @@ resource "bigip_waf_policy" "s4_qa" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures           = [ for k,v in data.bigip_waf_signatures.map: v.json ]
+    signatures           = [ for k,v in data.bigip_waf_signatures.map_qa: v.json ]
 }
 
 resource "bigip_waf_policy" "s4_prod" {
@@ -213,7 +223,7 @@ resource "bigip_waf_policy" "s4_prod" {
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+foo@bar:~$ terraform plan -out scenario4
 
 foo@bar:~$ terraform apply "scenario4"
 ```
@@ -227,7 +237,7 @@ Now, the applicatiopn owner identified that these last changes on the QA device 
  
  so we can proceed to the final changes before enforcing into production:
  
-**inputs.tfvars** file:
+**inputs.auto.tfvars** file:
 
 ```terraform
 signatures = {
@@ -299,7 +309,7 @@ resource "bigip_waf_policy" "s4_qa" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = [ for k,v in data.bigip_waf_signatures.map: v.json ]
+    signatures		 = [ for k,v in data.bigip_waf_signatures.map_qa: v.json ]
     parameters		 = [data.bigip_waf_entity_parameter.P1.json]
     urls		 = [data.bigip_waf_entity_url.U1.json]
 }
@@ -311,7 +321,7 @@ resource "bigip_waf_policy" "s4_prod" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario4.body
-    signatures		 = [ for k,v in data.bigip_waf_signatures.map: v.json ]
+    signatures		 = [ for k,v in data.bigip_waf_signatures.map_prod: v.json ]
     parameters		 = [data.bigip_waf_entity_parameter.P1.json]
     urls		 = [data.bigip_waf_entity_url.U1.json]
 }
@@ -320,7 +330,7 @@ resource "bigip_waf_policy" "s4_prod" {
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario4
+foo@bar:~$ terraform plan -out scenario4
 
 foo@bar:~$ terraform apply "scenario4"
 ```
