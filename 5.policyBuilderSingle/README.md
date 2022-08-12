@@ -111,12 +111,20 @@ foo@bar:~$ terraform apply "scenario5"
 ```
 
 Now you can go on your BIG-IP UI and associate the A.WAF Policy **scenario5** to the Virtual Server **scenario5.vs**.
+
 Note: remember, the Virtual Server and the whole application service can be automated using the BIG-IP provider with the AS3 or FAST resources.
 
 
 </br></br>
 
 ## Simulate a WAF Policy workflow
+
+Go to the DVWA Application through the BIGIP (if you are using UDF, there is a **scenario5** access.
+The credentials to log in to DVWA is admin/password.
+
+Go browse the DVWA website and create some attacks.
+
+
 
 Here is a typical workflow:
 You should have 22 Learning Suggestions with your WAF Policy.
