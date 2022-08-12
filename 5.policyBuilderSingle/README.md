@@ -190,7 +190,7 @@ You will get the JSON list of suggestions that have a learning score of 100%.
         },
         "entityType": "parameter"
       },
-//[...]      
+[...],      
       {
         "action": "add-or-update",
         "description": "Add Policy Server Technology",
