@@ -151,7 +151,7 @@ data "bigip_waf_pb_suggestions" "03JUN20221715" {
 }
 
 output "03JUN20221715" {
-	value	= bigip_waf_pb_suggestions.03JUN20221715.json
+	value	= data.bigip_waf_pb_suggestions.03JUN20221715.json
 }
 ```
 
