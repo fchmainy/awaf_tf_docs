@@ -1,0 +1,36 @@
+{
+   "policy" : {
+      "applicationLanguage" : "utf-8",
+      "caseInsensitive" : false,
+      "description" : "Fundamental Policy",
+      "enablePassiveMode" : false,
+      "enforcementMode" : "blocking",
+      "fullPath" : "/Common/scenario5",
+      "general" : {
+         "enforcementReadinessPeriod" : 0
+      },
+      "name" : "scenario5",
+      "policy-builder" : {
+         "enableUntrustedTrafficSiteChangeTracking" : true,
+         "learningMode" : "manual",
+         "trafficTighten" : {
+            "maxModificationSuggestionScore" : 60,
+            "totalRequests" : 10000
+         },
+         "untrustedTrafficLoosen" : {
+            "differentSources" : 10,
+            "minHoursBetweenSamples" : 0.5
+         },
+         "untrustedTrafficSiteChangeTracking" : {
+            "differentSources" : 5,
+            "minMinutesBetweenSamples" : 15
+         }
+      },
+      "protocolIndependent" : false,
+      "softwareVersion" : "16.1.2",
+      "template" : {
+         "name" : "POLICY_TEMPLATE_FUNDAMENTAL"
+      },
+      "type" : "security"
+   }
+}
