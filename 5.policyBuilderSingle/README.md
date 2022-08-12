@@ -69,7 +69,7 @@ provider "bigip" {
 }
 
 data "http" "scenario5" {
-  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/0.Appendix/scenario5_wLearningSuggestions.json"
+  url = "https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/0.Appendix/Common_scenario5__2022-8-12_15-49-28__prod1.f5demo.com.json"
   request_headers = {
   	Accept = "application/json"
   }
