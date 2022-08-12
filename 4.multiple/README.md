@@ -303,6 +303,7 @@ update the **main.tf** file:
 
 ```terraform
 resource "bigip_waf_policy" "s4_qa" {
+    provider	    	 = bigip.qa
     application_language = "utf-8"
     partition            = "Common"
     name                 = "scenario4"
@@ -315,6 +316,7 @@ resource "bigip_waf_policy" "s4_qa" {
 }
 
 resource "bigip_waf_policy" "s4_prod" {
+    provider	    	 = bigip.prod
     application_language = "utf-8"
     partition            = "Common"
     name                 = "scenario4"
