@@ -163,30 +163,70 @@ foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
 
 foo@bar:~$ terraform apply "scenario5"
 
-foo@bar:~$ terraform output AUG3rd20221715 | jq .
-
-foo@bar:~$ terraform output AUG3rd20221715 | jq '. | length'
+foo@bar:~$ terraform output AUG3rd20221715 | jq '. | fromjson'
 ```
+
+You will get the JSON list of suggestions that have a learning score of 100%.
+
+```json
+{
+    "suggestions": [
+      {
+        "action": "update-append",
+        "description": "Add/Update Parameter. Disable the matched signature on the matched Parameter",
+        "entity": {
+          "level": "global",
+          "name": "id"
+        },
+        "entityChanges": {
+          "signatureOverrides": [
+            {
+              "enabled": false,
+              "name": "SQL-INJ ' UNION SELECT (Parameter)",
+              "signatureId": 200002736
+            }
+          ],
+          "type": "explicit"
+        },
+        "entityType": "parameter"
+      },
+//[...]      
+      {
+        "action": "add-or-update",
+        "description": "Add Policy Server Technology",
+        "entity": {
+          "serverTechnologyName": "Unix/Linux"
+        },
+        "entityType": "server-technology"
+      }
+    ]
+  }
+```
+
 
 update the **main.tf** file:
 
 ```terraform
 resource "bigip_waf_policy" "this" {
-    provider	         = bigip.prod
+    provider             = bigip.prod
     application_language = "utf-8"
     partition            = "Common"
     name                 = "scenario5"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
-    policy_import_json   = data.http.scenario4.body
-    modifications		 = [data.bigip_waf_pb_suggestions.03JUN20221715.json]
+    policy_import_json   = data.http.scenario5.body
+    modifications        = [data.bigip_waf_pb_suggestions.AUG3rd20221715.json]
 }
 ```
+
+
 
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
+foo@bar:~$ terraform plan -out scenario5
 
 foo@bar:~$ terraform apply "scenario5"
 ```
+
+You can check on your BIGIP UI that the server technologies and other suggestions have been succesfully enforced to your WAF Policy.
