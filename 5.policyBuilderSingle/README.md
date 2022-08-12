@@ -104,11 +104,14 @@ Now initialize, plan and apply your new Terraform project.
 ```console
 foo@bar:~$ terraform init
 
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
+foo@bar:~$ terraform plan -out scenario5
 
 foo@bar:~$ terraform apply "scenario5"
 
 ```
+
+Now you can go on your BIG-IP UI and associate the A.WAF Policy **scenario5** to the Virtual Server **scenario5.vs**.
+Note: remember, the Virtual Server and the whole application service can be automated using the BIG-IP provider with the AS3 or FAST resources.
 
 
 </br></br>
