@@ -144,14 +144,15 @@ Create a **suggestions.tf** file:
 the name of the **bigip_waf_pb_suggestions** data source should be unique so we can track what modifications have been enforced and when it was.
 
 ```terraform
-data "bigip_waf_pb_suggestions" "03JUN20221715" {
+data "bigip_waf_pb_suggestions" "AUG3rd20221715" {
+    provider	           = bigip.prod
   policy_name            = "scenario5"
   partition              = "Common"
   minimum_learning_score = 100
 }
 
-output "03JUN20221715" {
-	value	= data.bigip_waf_pb_suggestions.03JUN20221715.json
+output "AUG3rd20221715" {
+	value	= data.bigip_waf_pb_suggestions.AUG3rd20221715.json
 }
 ```
 
@@ -162,9 +163,9 @@ foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
 
 foo@bar:~$ terraform apply "scenario5"
 
-foo@bar:~$ terraform output 03JUN20221715 | jq .
+foo@bar:~$ terraform output AUG3rd20221715 | jq .
 
-foo@bar:~$ terraform output 03JUN20221715 | jq '. | length'
+foo@bar:~$ terraform output AUG3rd20221715 | jq '. | length'
 ```
 
 update the **main.tf** file:
