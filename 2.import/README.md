@@ -62,7 +62,7 @@ provider "bigip" {
 }
 
 resource "bigip_waf_policy" "this" {
-  partition.           = "Common"
+  partition            = "Common"
   name                 = "scenario2"
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
 }
@@ -161,7 +161,8 @@ foo@bar:~$ terraform show -no-color
 resource "bigip_waf_policy" "this" {
     application_language = "utf-8"
     id                   = "EdchwjSqo9cFtYP-iWUJmw"
-    name                 = "/Common/scenario2"
+    name                 = "scenario2"
+    partition            = "Common"
     policy_export_json   = jsonencode(
         {
             [...]
@@ -178,7 +179,8 @@ using the collected data from the terraform import, we are now updating our **ma
 ```terraform
 resource "bigip_waf_policy" "this" {
     application_language = "utf-8"
-    name                 = "/Common/scenario2"
+    name                 = "scenario2"
+    partition            = "Common"
     policy_id            = "EdchwjSqo9cFtYP-iWUJmw"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
