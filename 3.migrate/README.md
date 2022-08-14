@@ -276,7 +276,7 @@ data "bigip_waf_entity_url" "U1" {
   name		              = "/URL1"
   description                 = "this is a test for URL1"
   type                        = "explicit"
-  protocol                    = "HTTP"
+  protocol                    = "http"
   perform_staging             = true
   signature_overrides_disable = [12345678, 87654321]
   method_overrides {
