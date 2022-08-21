@@ -105,7 +105,7 @@ Initializing provider plugins...
 [...]
 Terraform has been successfully initialized!
 
-foo@bar:~$ terraform plan -out scenario4
+foo@bar:~$ terraform plan -out scenario4 > output_scenario4.1
 
 foo@bar:~$ terraform apply "scenario4"
 
@@ -223,7 +223,7 @@ resource "bigip_waf_policy" "s4_prod" {
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -out scenario4
+foo@bar:~$ terraform plan -out scenario4 > output_scenario4.2
 
 foo@bar:~$ terraform apply "scenario4"
 ```
@@ -332,7 +332,7 @@ resource "bigip_waf_policy" "s4_prod" {
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -out scenario4
+foo@bar:~$ terraform plan -out scenario4 > output_scenario4.3
 
 foo@bar:~$ terraform apply "scenario4"
 ```
