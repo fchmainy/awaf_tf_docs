@@ -17,7 +17,7 @@ So the goal here is to **import** the current policy, which will be our current 
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.14.0 minimal
+ - [ ] use of F5 bigip provider version 1.15.0 minimal
  - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 
@@ -121,10 +121,12 @@ func main() {
 ```
 
 Now, run the following commands, so we can:
+
 	1. Initialize the terraform project
 	2. Import the current WAF policy into our state
 	3. Set the JSON WAF Policy as our new baseline
 	4. Configure the lifecycle of our WAF Policy
+
 
 ```console
 foo@bar:~$ terraform init
