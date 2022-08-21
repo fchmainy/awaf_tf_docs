@@ -49,7 +49,7 @@ variable password {}
 
 **inputs.tfvars**
 ```terraform
-previous_bigip = "10.1.1.:443"
+previous_bigip = "10.1.1.8:443"
 new_bigip = "10.1.1.9:443"
 username = "admin"
 password = "whatIsYourBigIPPassword?"
@@ -80,7 +80,7 @@ provider "bigip" {
 
 
 resource "bigip_waf_policy" "current" {
-  provider	           = bigip.old
+  provider	       = bigip.old
   partition            = "Common"
   name                 = "scenario3"
   template_name        = "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
