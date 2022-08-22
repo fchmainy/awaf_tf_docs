@@ -140,8 +140,9 @@ The credentials to log in to DVWA is admin/password.
 Now, if you go to the WAF Policy learning suggestions, you will find multiple suggestions with a high score of 100% (because we have not been picky in the learning process settings).
 
 Here is a typical workflow in a real life:
-	1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions.
-	2. once the cleaning is done, the terraform engineer (can either be the same person or different) creates a unique **bigip_waf_pb_suggestions** data source before issuing a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
+
+   1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions.
+   2. once the cleaning is done, the terraform engineer (can either be the same person or different) creates a unique **bigip_waf_pb_suggestions** data source before issuing a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
 
 *Note: Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.*
 
