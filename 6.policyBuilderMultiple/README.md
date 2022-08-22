@@ -240,8 +240,9 @@ check https://qa.f5demo.fch and see that the application is not broken and attac
 
 In a real life scenario, there are two ways we can consider this step:
 
-  a) the QA device WAF Policy should be 100% consistent with production devices
-  b) the QA device WAF Policy may have settings differences with production devices (Trusted IP exceptions for example)
+   a) the QA device WAF Policy should be 100% consistent with production devices
+  
+   b) the QA device WAF Policy may have settings differences with production devices (Trusted IP exceptions for example)
 
 
 #### a) QA.WAF == PROD.WAF
@@ -289,7 +290,7 @@ now, plan & apply!:
         ```
 
 
-#### a) QA.WAF != PROD.WAF
+#### b) QA.WAF != PROD.WAF
 
 In this case, we need to manage the learning suggestions as a separate **modifications** entity that has to move between WAF Policies.
 
