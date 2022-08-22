@@ -10,7 +10,7 @@ Every scenario down here describe the use case, the goals and gives details on t
 Every scenario is independant but we raise the bar progressively in term of complexity so we recommend taking time starting from the begining :) It will take approximately ~5 minutes per scenario.
 
 For users who can run these exercices in [UDF](https://udf.f5.com) you will find every file and scenarios in $HOME/terraform. The infrastructure is the following:
-![infrastructure](https://github.com/fchmainy/awaf_tf_docs/raw/main/0.Appendix/UDF-lab-architecture.png)
+![infrastructure](https://github.com/fchmainy/awaf_tf_docs/raw/main/0.Appendix/UDF-lab-architecture.jpeg)
 
 ## Some use-cases
 
