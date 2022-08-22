@@ -26,7 +26,7 @@ Note: The two uses cases aforementioned are not mutually exclusive and can be ma
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.15.0 minimal
+ - [ ] use of F5 bigip provider version 1.16.0 minimal
  - [ ] use of Hashicorp version following [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 </br></br>
@@ -35,7 +35,7 @@ Note: The two uses cases aforementioned are not mutually exclusive and can be ma
 
 Let's take the same We already have exported a WAF Policy called **scenario6.json** [available here](https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/6.policyBuilderMultiple/scenario6_wLearningSuggestions.jsonn) including several Policy Builder Suggestions so you won't have to generate traffic.
 
-So you have to create 4 files:
+You need to create the 4 following files:
 
 **variables.tf**
 ```terraform
@@ -167,43 +167,52 @@ Plan and apply your new Terraform project.
 ```console
 foo@bar:~$ terraform init
 
-foo@bar:~$ terraform plan -out scenario6
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
 
 foo@bar:~$ terraform apply "scenario6"
 ```
 
 Now go on your WebUI and associate the WAF Policies to the **scenario6.vs** Virtual Servers. (here we do it manually but it can definitely be done using the **"bigip_as3"** terraform resource from the same **Terraform "F5Networks/bigip" provider**).
 
+</br></br>
+
 ### 2. Running *Real life traffic*
 
-Now, run both legitimate AND illegitimate traffic against your two BIG-IP devices. Try to throw different attacks on each devices so we make sure we collect different Policy Builder suggestions.
-You will have to run multiple time the same request to make sure we get a satisfying learning score.
+Now, run both legitimate AND illegitimate traffic against your two production BIG-IP devices (scenario6 virtual servers on PROD1 and PROD2 BIG-IPs). Try to throw different attacks on each devices so we make sure we collect different Policy Builder suggestions (checkout the recommended steps described on [Module5](https://github.com/fchmainy/awaf_tf_docs/tree/main/5.policyBuilderSingle#simulate-a-waf-policy-workflow)).
 
-*For UDF users:
-We'll save you some times and already scripted some known attacks against DVWA. SSH on the client and run the $HOME/scripts/dvwa_scenario6.sh script.*
+You may have to run multiple time the same request to make sure we get a satisfying learning score.
 
+</br></br>
 
 ### 3. Collect and test the Policy Builder suggestions.
 
 Create a **pb_suggestions.tf** file:
 
 ```terraform
-data "bigip_waf_pb_suggestions" "S6_03JUL20221800_P1" {
-  provider	         = bigip.prod1
+data "bigip_waf_pb_suggestions" "S6_22AUG20221800_P1" {
+  provider	             = bigip.prod1
   policy_name            = "scenario6"
   partition              = "Common"
-  minimum_learning_score = 10
+  minimum_learning_score = 100
 }
 
-data "bigip_waf_pb_suggestions" "S6_03JUL20221800_P2" {
-  provider	         = bigip.prod2
+data "bigip_waf_pb_suggestions" "S6_22AUG20221800_P2" {
+  provider	             = bigip.prod2
   policy_name            = "scenario6"
   partition              = "Common"
-  minimum_learning_score = 10
+  minimum_learning_score = 100
+}
+
+output "PB_S6_22AUG20221800_P1" {
+	value	= data.bigip_waf_pb_suggestions.S6_22AUG20221800_P1.json
+}
+
+output "PB_S6_22AUG20221800_P2" {
+	value	= data.bigip_waf_pb_suggestions.S6_22AUG20221800_P2.json
 }
 ```
 
-and update the **main.tf** file on the QA section:
+and update the **main.tf** file on the scenario6 QA WAF Policy resource:
 
 ```terraform
 resource "bigip_waf_policy" "QAS6" {
@@ -213,19 +222,15 @@ resource "bigip_waf_policy" "QAS6" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario6.body
-    modifications        = [data.bigip_waf_pb_suggestions.S6_03JUL20221800_P1.json, data.bigip_waf_pb_suggestions.S6_03JUL20221800_P2.json]
+    modifications	     = [data.bigip_waf_pb_suggestions.S6_22AUG20221800_P1.json, data.bigip_waf_pb_suggestions.S6_22AUG20221800_P2.json]
 }
 ```
+
+*Notes:*
+*There are obviously some redundant learning suggestions on both data sources but the Declarative WAF API automatically removes them.*
+
+
 Now you can test your application through the QA device.
-
-Plan and apply your new Terraform project.
-```console
-foo@bar:~$ terraform init
-
-foo@bar:~$ terraform plan -out scenario6
-
-foo@bar:~$ terraform apply "scenario6"
-```
 
 *For UDF users:
 check https://qa.f5demo.fch and see that the application is not broken and attacks are blocked*
@@ -233,45 +238,99 @@ check https://qa.f5demo.fch and see that the application is not broken and attac
 
 ### 4. Enforce suggestions on the Production devices
 
-Here, there are two ways we can consider this step:
+In a real life scenario, there are two ways we can consider this step:
 
-a) the QA device WAF Policy should be 100% consistent with production devices
-b) the QA device WAF Policy has differences with production devices (IP exceptions for example)
+  a) the QA device WAF Policy should be 100% consistent with production devices
+  b) the QA device WAF Policy may have settings differences with production devices (Trusted IP exceptions for example)
+
 
 #### a) QA.WAF == PROD.WAF
 
-That is the easiest way. After validating the suggestions and removing the potential False Positives (remember, if you enforce a suggestion with a low  Learning score, you have no guarantee on the accuracy of that suggestion)
+That is the easiest way. After validating the suggestions and removing the potential False Positives, just output the JSON policy from QA and refer to it as a **policy_import_json** argument in the production BIG-IPs 
 
 In this case, update the **main.tf** file
 
-
-[ IAMHERE ]
-
-
-
-#### a) QA.WAF != PROD.WAF
-
-
-
-
-
-update the **main.tf** file:
-
 ```terraform
-resource "bigip_waf_policy" "this" {
-    application_language = "utf-8"
-    name                 = "/Common/scenario4"
-    template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
-    type                 = "security"
-    policy_import_json   = data.http.scenario4.body
-    suggestions		 = [data.bigip_waf_pb_suggestions.03JUN20221715.json]
+resource "bigip_waf_policy" "P1S6" {
+    provider	           	= bigip.prod1
+    application_language 	= "utf-8"
+    partition			    = "Common"
+    name                 	= "scenario6"
+    enforcement_mode     	= "blocking"
+    template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json
+}
+
+resource "bigip_waf_policy" "P2S6" {
+    provider	           	= bigip.prod2
+    application_language 	= "utf-8"
+    partition		    	= "Common"
+    name                 	= "scenario6"
+    enforcement_mode     	= "blocking"
+    template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json
+}
+
+resource "bigip_waf_policy" "QAS6" {
+    provider	           	= bigip.qa
+    application_language 	= "utf-8"
+    partition			    = "Common"
+    name                 	= "scenario6"
+    enforcement_mode     	= "blocking"
+    template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
 }
 ```
 
 now, plan & apply!:
 
-```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
+        ```console
+        foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+        foo@bar:~$ terraform apply "scenario6"
+        ```
 
-foo@bar:~$ terraform apply "scenario5"
+
+#### a) QA.WAF != PROD.WAF
+
+In this case, we need to manage the learning suggestions as a separate **modifications** entity that has to move between WAF Policies.
+
+The learning suggestions, when imported into the QA WAF Policy, are deduplicated and ingested into the WAF Policy. However, they remain in a dedicated space of the Declarative REST JSON: the **modifications** array. So, the goal is to import only this section back to the production devices, so any differences in the core entities are not affected.
+
+```terraform
+resource "bigip_waf_policy" "P1S6" {
+    provider	           	= bigip.prod1
+    application_language 	= "utf-8"
+    partition			    = "Common"
+    name                 	= "scenario6"
+    enforcement_mode     	= "blocking"
+    template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json.modifications
+}
+
+resource "bigip_waf_policy" "P2S6" {
+    provider	           	= bigip.prod2
+    application_language 	= "utf-8"
+    partition		    	= "Common"
+    name                 	= "scenario6"
+    enforcement_mode     	= "blocking"
+    template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json.modifications
+}
+
+resource "bigip_waf_policy" "QAS6" {
+    provider	           	= bigip.qa
+    application_language 	= "utf-8"
+    partition			    = "Common"
+    name                 	= "scenario6"
+    enforcement_mode     	= "blocking"
+    template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
+}
 ```
+now, plan & apply!:
+
+        ```console
+        foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+        foo@bar:~$ terraform apply "scenario6"
+        ```
+
+
+
