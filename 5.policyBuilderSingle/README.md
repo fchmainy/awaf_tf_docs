@@ -119,20 +119,29 @@ Note: remember, the Virtual Server and the whole application service can be auto
 
 ## Simulate a WAF Policy workflow
 
-Go to the DVWA Application through the BIGIP (if you are using UDF, there is a **scenario5** access.
+### Change the Policy Builder process (For testing and demoing purpose only):
+  - First, go to the DVWA WAF Policy on your BIG-IP TMUI (if you are using UDF, the WAF policy is called **scenario5** and is located under the **Common** partition.
+  - In the **Learning and blocking Settings (Security  ››  Application Security : Policy Building : Learning and Blocking Settings)**, at the very bottom of the page, go on the **Loosen Policy** settings in the **Advanced** view of the **Policy Building Process**. 
+  - Change the **different sources, spread out over a time period of at least** value from **10** to **1** so the policy builder generates learning suggestions more rapidely.
+
+### Browse the Vulnerable Application
+Now browse the DVWA web application through the AWAF Virtual Server.
 The credentials to log in to DVWA is admin/password.
+  - Go on the ***DVWA Security** menu and change the level to **Low** then **Submit**
+  - Browse the DVWA website by clicking into any menus. 
+  - Then generate some attacks:
+	- SQL Injection:
+		%' or 1='1
+		' and 1=0 union select null, concat(first_name,0x0a,last_name,0x0a,user,0x0a,password) from users #
+	- XSS Reflected:
+		<script>alert('hello')</script>
 
-Go browse the DVWA website and create some attacks.
+### Check Learning Suggestions
+Now, if you go to the WAF Policy learning suggestions, you will find multiple suggestions with a high score of 100% (because we have not been picky in the learning process settings).
 
-
-
-Here is a typical workflow:
-You should have 22 Learning Suggestions with your WAF Policy.
-
- 1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions. Let's say we will remove the following suggestion:
-	* **Enable HTTP Protocol Compliace Check** HTTP Check: Check maximum number of parameters
-
- 2. once the cleaning is done, the terraform engineer (here it is also yourself :) but in a real life he can be a different individual) creates a unique **bigip_waf_pb_suggestions** data source before issuing a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
+Here is a typical workflow in a real life:
+	1. the security engineer (yourself) regularly checks the sugestions directly on the BIG-IP WebUI and clean the irrelevant suggestions.
+	2. once the cleaning is done, the terraform engineer (can either be the same person or different) creates a unique **bigip_waf_pb_suggestions** data source before issuing a terraform apply for the current suggestions. You can filter the suggestions on their scoring level (from 5 to 100% - 100% having the highest confidence level).
 
 *Note: Every suggestions application can be tracked on Terraform and can easily be roll-backed if needed.*
 
@@ -153,7 +162,7 @@ the name of the **bigip_waf_pb_suggestions** data source should be unique so we 
 
 ```terraform
 data "bigip_waf_pb_suggestions" "AUG3rd20221715" {
-    provider	           = bigip.prod
+  provider	           = bigip.prod 
   policy_name            = "scenario5"
   partition              = "Common"
   minimum_learning_score = 100
