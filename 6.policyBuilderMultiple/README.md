@@ -26,7 +26,7 @@ Note: The two uses cases aforementioned are not mutually exclusive and can be ma
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.16.0 minimal
+ - [ ] use of F5 bigip provider version 1.15.0 minimal
  - [ ] use of Hashicorp version following [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 </br></br>
@@ -167,7 +167,7 @@ Plan and apply your new Terraform project.
 ```console
 foo@bar:~$ terraform init
 
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+foo@bar:~$ terraform plan -out scenario6
 
 foo@bar:~$ terraform apply "scenario6"
 ```
@@ -196,7 +196,7 @@ data "bigip_waf_pb_suggestions" "S6_03JUL20221800_P1" {
 }
 
 data "bigip_waf_pb_suggestions" "S6_03JUL20221800_P2" {
-  provider	         = bigip.prod1
+  provider	         = bigip.prod2
   policy_name            = "scenario6"
   partition              = "Common"
   minimum_learning_score = 10
@@ -213,10 +213,19 @@ resource "bigip_waf_policy" "QAS6" {
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario6.body
-    modifications	 = [data.bigip_waf_pb_suggestions.S6_03JUL20221800_P1, data.bigip_waf_pb_suggestions.S6_03JUL20221800_P2]
+    modifications        = [data.bigip_waf_pb_suggestions.S6_03JUL20221800_P1.json, data.bigip_waf_pb_suggestions.S6_03JUL20221800_P2.json]
 }
 ```
 Now you can test your application through the QA device.
+
+Plan and apply your new Terraform project.
+```console
+foo@bar:~$ terraform init
+
+foo@bar:~$ terraform plan -out scenario6
+
+foo@bar:~$ terraform apply "scenario6"
+```
 
 *For UDF users:
 check https://qa.f5demo.fch and see that the application is not broken and attacks are blocked*
@@ -226,8 +235,8 @@ check https://qa.f5demo.fch and see that the application is not broken and attac
 
 Here, there are two ways we can consider this step:
 
- a) the QA device WAF Policy should be 100% consistent with production devices
- b) the QA device WAF Policy has differences with production devices (IP exceptions for example)
+a) the QA device WAF Policy should be 100% consistent with production devices
+b) the QA device WAF Policy has differences with production devices (IP exceptions for example)
 
 #### a) QA.WAF == PROD.WAF
 
