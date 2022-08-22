@@ -328,10 +328,10 @@ resource "bigip_waf_policy" "QAS6" {
 ```
 now, plan & apply!:
 
-        ```console
-        foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
-        foo@bar:~$ terraform apply "scenario6"
-        ```
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+foo@bar:~$ terraform apply "scenario6"
+```
 
 
 
