@@ -7,10 +7,9 @@
 </br></br>
 
 ## Goals
-The goal of this lab) is to manage Policy Builder Suggestions an A.WAF Policy from on multiple devices or clusters. Several use cases are covered here:
-
- - Multiple devices serving and protecting the same application (multiple datacenters, application spanned across multiple clouds... By nature, each standalone device or clusters can see different traffic patterns so the suggestions can be somehow differents. The goal here is to consolidate the suggestions before enforcing them.
- - Production BIG-IPs protecting the application therefore seeing the real life traffic flow for seeding the Policy Builder but all changes need to be first validated in the qualification environment before enforcing into production.
+The goal of this lab is to manage Policy Builder Suggestions an A.WAF Policy from on multiple devices or clusters. Several use cases are covered here:
+  - Multiple devices serving and protecting the same application (multiple datacenters, application spanned across multiple clouds... By nature, each standalone device or clusters can see different traffic patterns so the suggestions can be somehow differents. The goal here is to consolidate the suggestions before enforcing them.
+  - Production BIG-IPs protecting the application therefore seeing the real life traffic flow for seeding the Policy Builder but all changes need to be first validated in the qualification environment before enforcing into production.
 
 Note: The two uses cases aforementioned are not mutually exclusive and can be managed within a single workflow
 
@@ -27,7 +26,7 @@ Note: The two uses cases aforementioned are not mutually exclusive and can be ma
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.14.0 minimal
+ - [ ] use of F5 bigip provider version 1.16.0 minimal
  - [ ] use of Hashicorp version following [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 </br></br>
@@ -49,7 +48,7 @@ variable password {}
 
 **inputs.auto.tfvars**
 ```terraform
-prod_dc1_bigip = "10.1.1.4"
+prod_dc1_bigip = "10.1.1.8"
 prod_cloud_bigip = "10.1.1.7"
 qa_bigip = "10.1.1.9"
 username = "admin"
