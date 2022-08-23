@@ -177,7 +177,7 @@ output "AUG3rd20221715" {
 You can check here the suggestions before they are applied to the BIG-IP:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario5
+foo@bar:~$ terraform plan -out scenario5
 
 foo@bar:~$ terraform apply "scenario5"
 
