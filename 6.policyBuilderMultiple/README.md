@@ -33,7 +33,6 @@ Note: The two uses cases aforementioned are not mutually exclusive and can be ma
 
 ## Policy Creation
 
-Let's take the same We already have exported a WAF Policy called **scenario6.json** [available here](https://raw.githubusercontent.com/fchmainy/awaf_tf_docs/main/6.policyBuilderMultiple/scenario6_wLearningSuggestions.jsonn) including several Policy Builder Suggestions so you won't have to generate traffic.
 
 You need to create the 4 following files:
 
@@ -115,9 +114,6 @@ resource "bigip_waf_policy" "QAS6" {
 }
 ```
 
-*Notes: 
-	- the template name can be set to anything. When the policy is imported, its key value will overwrite the value
-	- we start on the 3 BIG-IPs with the same WAF Policy*
 
 
 **outputs.tf**
