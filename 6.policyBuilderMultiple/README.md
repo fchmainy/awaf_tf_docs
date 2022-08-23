@@ -167,7 +167,7 @@ Plan and apply your new Terraform project.
 ```console
 foo@bar:~$ terraform init
 
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+foo@bar:~$ terraform plan -out scenario6
 
 foo@bar:~$ terraform apply "scenario6"
 ```
@@ -286,7 +286,7 @@ resource "bigip_waf_policy" "QAS6" {
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+foo@bar:~$ terraform plan -out scenario6
 foo@bar:~$ terraform apply "scenario6"
 ```
 
@@ -330,7 +330,7 @@ resource "bigip_waf_policy" "QAS6" {
 now, plan & apply!:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+foo@bar:~$ terraform plan -out scenario6
 foo@bar:~$ terraform apply "scenario6"
 ```
 
