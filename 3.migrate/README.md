@@ -10,7 +10,7 @@ You can meet this scenario in multiple use-cases:
 The goal is to leverage [the previous import scenario](https://github.com/fchmainy/awaf_tf_docs/blob/main/2.import/README.md) in order to carry and ingest the WAF Policy from one BIG-IP to another while keeping its state through Terraform.
 
 
-The WAF Policy and its children objects (parameters, urls, attack signatures, exceptions...) can be tightly coupled to a big-ip AND / OR can be shared across multiple policies depending on the use case.
+The WAF Policy and its children objects (parameters, urls, attack signatures, exceptions...) can be tightly coupled to a BIG-IP AND / OR can be shared across multiple policies depending on the use case.
 
 
 
@@ -25,7 +25,7 @@ The WAF Policy and its children objects (parameters, urls, attack signatures, ex
 
 **on Terraform:**
 
- - [ ] use of F5 bigip provider version 1.15.0 minimal
+ - [ ] use of F5 BIG-IP provider version 1.15.0 minimal
  - [ ] use of Hashicorp version followinf [Link](https://clouddocs.f5.com/products/orchestration/terraform/latest/userguide/overview.html#releases-and-versioning)
 
 
