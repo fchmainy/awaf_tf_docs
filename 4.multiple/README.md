@@ -106,13 +106,14 @@ Initializing provider plugins...
 Terraform has been successfully initialized!
 
 foo@bar:~$ terraform plan -out scenario4 > output_scenario4.1
-
+foo@bar:~$ more output_scenario4.1
 foo@bar:~$ terraform apply "scenario4"
 
 ```
 You can check on both BIG-IPs, the two policies are here and very consistent.
 
-===
+
+
 
 ## Simulate a WAF Policy workflow
 
@@ -224,7 +225,7 @@ now, plan & apply!:
 
 ```console
 foo@bar:~$ terraform plan -out scenario4 > output_scenario4.2
-
+foo@bar:~$ more output_scenario4.2
 foo@bar:~$ terraform apply "scenario4"
 ```
 
@@ -333,7 +334,7 @@ now, plan & apply!:
 
 ```console
 foo@bar:~$ terraform plan -out scenario4 > output_scenario4.3
-
+foo@bar:~$ more output_scenario4.3
 foo@bar:~$ terraform apply "scenario4"
 ```
 
