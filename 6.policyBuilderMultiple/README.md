@@ -97,18 +97,18 @@ resource "bigip_waf_policy" "P1S6" {
 }
 
 resource "bigip_waf_policy" "P2S6" {
-    provider	           	= bigip.prod2
+    provider                    = bigip.prod2
     application_language 	= "utf-8"
-    partition			= "Common"
+    partition                   = "Common"
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
 }
 
 resource "bigip_waf_policy" "QAS6" {
-    provider	           	= bigip.qa
+    provider                    = bigip.qa
     application_language 	= "utf-8"
-    partition			= "Common"
+    partition                   = "Common"
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
@@ -190,14 +190,14 @@ Create a **pb_suggestions.tf** file:
 
 ```terraform
 data "bigip_waf_pb_suggestions" "S6_22AUG20221800_P1" {
-  provider	             = bigip.prod1
+  provider	         = bigip.prod1
   policy_name            = "scenario6"
   partition              = "Common"
   minimum_learning_score = 100
 }
 
 data "bigip_waf_pb_suggestions" "S6_22AUG20221800_P2" {
-  provider	             = bigip.prod2
+  provider	         = bigip.prod2
   policy_name            = "scenario6"
   partition              = "Common"
   minimum_learning_score = 100
@@ -218,11 +218,12 @@ and update the **main.tf** file on the scenario6 QA WAF Policy resource:
 resource "bigip_waf_policy" "QAS6" {
     provider	         = bigip.qa
     application_language = "utf-8"
-    name                 = "/Common/scenario6"
+    name                 = "scenario6"
+    partition            = "Common"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
     policy_import_json   = data.http.scenario6.body
-    modifications	     = [data.bigip_waf_pb_suggestions.S6_22AUG20221800_P1.json, data.bigip_waf_pb_suggestions.S6_22AUG20221800_P2.json]
+    modifications        = [data.bigip_waf_pb_suggestions.S6_22AUG20221800_P1.json, data.bigip_waf_pb_suggestions.S6_22AUG20221800_P2.json]
 }
 ```
 
@@ -255,11 +256,11 @@ In this case, update the **main.tf** file
 resource "bigip_waf_policy" "P1S6" {
     provider	           	= bigip.prod1
     application_language 	= "utf-8"
-    partition			    = "Common"
+    partition			= "Common"
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
-    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json
+    policy_import_json          = bigip_waf_policy.QAS6.policy_export_json
 }
 
 resource "bigip_waf_policy" "P2S6" {
@@ -269,13 +270,13 @@ resource "bigip_waf_policy" "P2S6" {
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
-    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json
+    policy_import_json          = bigip_waf_policy.QAS6.policy_export_json
 }
 
 resource "bigip_waf_policy" "QAS6" {
     provider	           	= bigip.qa
     application_language 	= "utf-8"
-    partition			    = "Common"
+    partition                   = "Common"
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
@@ -284,10 +285,10 @@ resource "bigip_waf_policy" "QAS6" {
 
 now, plan & apply!:
 
-        ```console
-        foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
-        foo@bar:~$ terraform apply "scenario6"
-        ```
+```console
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario6
+foo@bar:~$ terraform apply "scenario6"
+```
 
 
 #### b) QA.WAF != PROD.WAF
@@ -300,11 +301,11 @@ The learning suggestions, when imported into the QA WAF Policy, are deduplicated
 resource "bigip_waf_policy" "P1S6" {
     provider	           	= bigip.prod1
     application_language 	= "utf-8"
-    partition			    = "Common"
+    partition                   = "Common"
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
-    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json.modifications
+    policy_import_json          = bigip_waf_policy.QAS6.policy_export_json.modifications
 }
 
 resource "bigip_waf_policy" "P2S6" {
@@ -314,13 +315,13 @@ resource "bigip_waf_policy" "P2S6" {
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
-    policy_import_json      = bigip_waf_policy.QAS6.policy_export_json.modifications
+    policy_import_json          = bigip_waf_policy.QAS6.policy_export_json.modifications
 }
 
 resource "bigip_waf_policy" "QAS6" {
     provider	           	= bigip.qa
     application_language 	= "utf-8"
-    partition			    = "Common"
+    partition                   = "Common"
     name                 	= "scenario6"
     enforcement_mode     	= "blocking"
     template_name        	= "POLICY_TEMPLATE_RAPID_DEPLOYMENT"
