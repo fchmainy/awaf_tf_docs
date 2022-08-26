@@ -88,8 +88,14 @@ Just before we go. We need the Policy ID. There are multiple ways we can get it:
 - get a script example in the lab/scripts/ folder
 - using a Go code 
 
-run the following piece of code in the [Go PlayGround](https://go.dev/play/)
+Here we are using the Online Go Playground as it is easy and quick to use:
 
+ - a/ copy the following piece of code in the [Go PlayGround](https://go.dev/play/)
+ - b/ update the value of the following variables located in the **main** function:
+	  var partition string = "Common"
+	  var policyName string = "scenario2"
+ - c/ Run and get the policy ID.
+	
 ```golang
 package main
 
