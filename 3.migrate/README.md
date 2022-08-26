@@ -35,7 +35,7 @@ The WAF Policy and its children objects (parameters, urls, attack signatures, ex
 Create 4 files:
 - main.tf
 - variables.tf
-- inputs.tfvars
+- inputs.auto.tfvars
 - outputs.tf
 
 
@@ -47,7 +47,7 @@ variable username {}
 variable password {}
 ```
 
-**inputs.tfvars**
+**inputs.auto.tfvars**
 ```terraform
 previous_bigip = "10.1.1.8:443"
 new_bigip = "10.1.1.9:443"
@@ -151,7 +151,7 @@ Initializing provider plugins...
 [...]
 Terraform has been successfully initialized!
 
-foo@bar:~$ terraform import -var-file=inputs.tfvars bigip_waf_policy.current YiEQ4l1Fw1U9UnB2-mTKWA
+foo@bar:~$ terraform import bigip_waf_policy.current YiEQ4l1Fw1U9UnB2-mTKWA
 bigip_waf_policy.this: Importing from ID "YiEQ4l1Fw1U9UnB2-mTKWA"...
 bigip_waf_policy.this: Import prepared!
   Prepared bigip_waf_policy for import
@@ -208,7 +208,7 @@ resource "bigip_waf_policy" "migrated" {
 Finally, we can plan & apply our new project.
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario3
+foo@bar:~$ terraform pla -out scenario3
 bigip_waf_policy.migrated: Refreshing state... [id=YiEQ4l1Fw1U9UnB2-mTKWA]
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
@@ -263,7 +263,7 @@ resource "bigip_waf_policy" "migrated" {
 ```
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario3
+foo@bar:~$ terraform plan -out scenario3
 foo@bar:~$ terraform apply "scenario3"
 ```
 
@@ -306,7 +306,7 @@ resource "bigip_waf_policy" "migrated" {
 and run it:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario3
+foo@bar:~$ terraform plan -out scenario3
 foo@bar:~$ terraform apply "scenario3"
 ```
 
@@ -342,7 +342,7 @@ resource "bigip_waf_policy" "migrated" {
 and run it:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario3
+foo@bar:~$ terraform plan -out scenario3
 foo@bar:~$ terraform apply "scenario3"
 ```
 
