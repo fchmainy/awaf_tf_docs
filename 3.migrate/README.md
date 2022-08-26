@@ -138,10 +138,11 @@ func main() {
 ```
 
 Now, run the following commands, so we can:
-	1. Initialize the terraform project
-	2. Import the current WAF policy from the "old" BIG-IP into our state
-	3. Create the A.WAF Policy resource for the "BIG-IP" pointing to the imported state
-	4. Configure the lifecycle of our WAF Policy
+
+  1. Initialize the terraform project
+  2. Import the current WAF policy from the "old" BIG-IP into our state
+  3. Create the A.WAF Policy resource for the "BIG-IP" pointing to the imported state
+  4. Configure the lifecycle of our WAF Policy
 
 ```console
 foo@bar:~$ terraform init
@@ -208,7 +209,7 @@ resource "bigip_waf_policy" "migrated" {
 Finally, we can plan & apply our new project.
 
 ```console
-foo@bar:~$ terraform pla -out scenario3
+foo@bar:~$ terraform plan -out scenario3
 bigip_waf_policy.migrated: Refreshing state... [id=YiEQ4l1Fw1U9UnB2-mTKWA]
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
