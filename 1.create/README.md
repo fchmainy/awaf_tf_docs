@@ -21,7 +21,7 @@
 Create 3 files:
 - main.tf
 - variables.tf
-- inputs.tfvars
+- inputs.auto.tfvars
 
 
 
@@ -32,7 +32,7 @@ variable username {}
 variable password {}
 ```
 
-**inputs.tfvars**
+**inputs.auto.tfvars**
 ```terraform
 bigip = "10.1.1.9:443"
 username = "admin"
@@ -96,7 +96,7 @@ If you ever set or change modules or backend configuration for Terraform,
 rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario1
+foo@bar:~$ terraform plan -out scenario1
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
   + create
@@ -207,7 +207,7 @@ resource "bigip_waf_policy" "this" {
 run it:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario1
+foo@bar:~$ terraform plan -out scenario1
 [...]
 
 Plan: 0 to add, 1 to change, 0 to destroy.
@@ -277,7 +277,7 @@ resource "bigip_waf_policy" "this" {
 run it:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario1
+foo@bar:~$ terraform plan -out scenario1
 [...]
   # bigip_waf_policy.this will be updated in-place
   ~ resource "bigip_waf_policy" "this" {
@@ -377,7 +377,7 @@ variable username {}
 variable password {}
 ```
 
-**inputs.tfvars**
+**inputs.auto.tfvars**
 ```terraform
 bigip = "10.1.1.9:443"
 username = "admin"
@@ -417,7 +417,7 @@ resource "bigip_waf_policy" "this" {
 run it:
 
 ```console
-foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario1.swagger
+foo@bar:~$ terraform plan -out scenario1.swagger
 [...]
   # bigip_waf_policy.this must be replaced
 -/+ resource "bigip_waf_policy" "this" {
