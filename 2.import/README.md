@@ -143,7 +143,7 @@ Initializing provider plugins...
 
 Terraform has been successfully initialized!
 
-foo@bar:~$ terraform import -var-file=inputs.tfvars bigip_waf_policy.this EdchwjSqo9cFtYP-iWUJmw
+foo@bar:~$ terraform import bigip_waf_policy.this EdchwjSqo9cFtYP-iWUJmw
 bigip_waf_policy.this: Importing from ID "EdchwjSqo9cFtYP-iWUJmw"...
 bigip_waf_policy.this: Import prepared!
   Prepared bigip_waf_policy for import
