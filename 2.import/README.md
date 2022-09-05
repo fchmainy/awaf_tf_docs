@@ -3,8 +3,7 @@
 
 ## Goals
 
-You may already have multiple WAF policies protecting your applications and these WAF policies have evolved over the past months or years. If you have to re-create an existing WAF Policy from zero with every attributes, entities and exceptions it will be complicated to do such an extensive inventory of them and put it together into a new declaration.
-
+You may already have multiple WAF policies protecting your applications and these WAF policies have evolved over the past months or years. It may be very complicated to do an extensive inventory of each policy, each entity and every attribute.
 So the goal here is to **import** the current policy, which will be our current baseline. Every new change, addition of a Server Technology, parameter, attack signature... will be done through Terraform in addition or correction of this new baseline.
 
 ## Pre-requisites
@@ -81,13 +80,13 @@ output "policyJSON" {
 }
 ```
 
-As you can see, we create a place holder for the **"bigip_waf_policy"** with the two required attributes of the terraform resource: name and template_name. It is required to provide them in order to be able to manage the resource. The **template_name** can be set to anything, the value in the existing WAF Policy will preempt over the value set as a terraform argument.
+As you can see, we only define the two required attributes of the **"bigip_waf_policy"** terraform resource: name and template_name. It is required to provide them in order to be able to manage the resource.
 
 
 Just before we go. We need the Policy ID. There are multiple ways we can get it:
 - check on the iControl REST API Endpoint: /mgmt/tm/asm/policies?$filter=name+eq+**scenario2**&$select=id
 - get a script example in the lab/scripts/ folder
-- using a Go code 
+- using a Go code
 
 Here we are using the Online Go Playground as it is easy and quick to use:
 
@@ -96,7 +95,7 @@ Here we are using the Online Go Playground as it is easy and quick to use:
 	  var partition string = "Common"
 	  var policyName string = "scenario2"
  - c/ Run and get the policy ID.
-	
+
 ```golang
 package main
 
@@ -131,7 +130,8 @@ Now, run the following commands, so we can:
 
 	1. Initialize the terraform project
 	2. Import the current WAF policy into our state
-	3. Configure the lifecycle of our WAF Policy
+	3. Set the JSON WAF Policy as our new baseline
+	4. Configure the lifecycle of our WAF Policy
 
 
 ```console
@@ -160,7 +160,10 @@ your Terraform state and will henceforth be managed by Terraform.
 
 Now update your terraform main.tf file with the ouputs of the following two commands:
 
+
 ```console
+foo@bar:~$ terraform show -json | jq '.values.root_module.resources[].values.policy_export_json | fromjson' > importedWAFPolicy.json
+
 foo@bar:~$ terraform show -no-color
 # bigip_waf_policy.this:
 resource "bigip_waf_policy" "this" {
@@ -189,6 +192,7 @@ resource "bigip_waf_policy" "this" {
     policy_id            = "EdchwjSqo9cFtYP-iWUJmw"
     template_name        = "POLICY_TEMPLATE_FUNDAMENTAL"
     type                 = "security"
+    policy_import_json   = file("${path.module}/importedWAFPolicy.json")
 }
 ```
 
@@ -332,5 +336,3 @@ and run it:
 foo@bar:~$ terraform plan -out scenario2
 foo@bar:~$ terraform apply "scenario2"
 ```
-
-
