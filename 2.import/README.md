@@ -201,7 +201,7 @@ You can note that we replaced the "policy_export_json" argument with "policy_imp
 Finally, we can plan & apply our new project.
 
 ```console
-foo@bar:~$ terraform plan -out scenario2
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario2
 bigip_waf_policy.this: Refreshing state... [id=EdchwjSqo9cFtYP-iWUJmw]
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
@@ -256,7 +256,7 @@ resource "bigip_waf_policy" "this" {
 ```
 
 ```console
-foo@bar:~$ terraform plan -out scenario2
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario2
 foo@bar:~$ terraform apply "scenario2"
 ```
 
@@ -299,7 +299,7 @@ resource "bigip_waf_policy" "this" {
 and run it:
 
 ```console
-foo@bar:~$ terraform plan -out scenario2
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario2
 foo@bar:~$ terraform apply "scenario2"
 ```
 
@@ -333,6 +333,6 @@ resource "bigip_waf_policy" "this" {
 and run it:
 
 ```console
-foo@bar:~$ terraform plan -out scenario2
+foo@bar:~$ terraform plan -var-file=inputs.tfvars -out scenario2
 foo@bar:~$ terraform apply "scenario2"
 ```
