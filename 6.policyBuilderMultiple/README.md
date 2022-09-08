@@ -19,7 +19,7 @@ Note: The two uses cases aforementioned are not mutually exclusive and can be ma
 
 **on the BIG-IPs:**
 
- - [ ] version 15.1 minimal
+ - [ ] version 16.1 minimal
  - [ ] A.WAF Provisioned
  - [ ] credentials with REST API access
  - [ ] an A.WAF Policy with Policy Builder enabled and Manual traffic Learning
