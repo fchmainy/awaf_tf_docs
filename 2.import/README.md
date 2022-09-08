@@ -10,7 +10,7 @@ So the goal here is to **import** the current policy, which will be our current 
 
 **on the BIG-IP:**
 
- - [ ] version 15.1 minimal
+ - [ ] version 16.1 minimal
  - [ ] credentials with REST API access
  - [ ] /Common/scenario2 WAF policy (Rapid deployment template) created
 
