@@ -18,7 +18,7 @@ The goal of this lab is to manage Policy Builder Suggestions an A.WAF Policy on 
 
 **on the BIG-IP:**
 
- - [ ] version 15.1 minimal
+ - [ ] version 16.1 minimal
  - [ ] A.WAF Provisioned
  - [ ] credentials with REST API access
  - [ ] an A.WAF Policy with Policy Builder enabled and Manual traffic Learning
