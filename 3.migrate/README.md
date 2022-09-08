@@ -18,7 +18,7 @@ The WAF Policy and its children objects (parameters, urls, attack signatures, ex
 
 **on the BIG-IP:**
 
- - [ ] version 15.1 minimal
+ - [ ] version 16.1 minimal
  - [ ] A.WAF Provisioned
  - [ ] credentials with REST API access
 
