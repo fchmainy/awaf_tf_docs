@@ -5,7 +5,7 @@
 
 **on the BIG-IP:**
 
-- [ ] version 15.1 minimal
+- [ ] version 16.1 minimal
 - [ ] credentials with REST API access
 
 
